@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<marytts-install xmlns="http://mary.dfki.de/installer">
+    <voice gender="male" locale="en-GB" name="dfki-obadiah-hsmm"
+        type="hsmm" version="5.1">
+        <description>A male British English hidden semi-Markov model voice</description>
+        <license href="http://mary.dfki.de/download/by-nd-3.0.html"/>
+        <package filename="voice-dfki-obadiah-hsmm-5.1.zip"
+            md5sum="eb9872af54a1f944f191b2b7237f8d25" size="1216409">
+            <location folder="true" href="http://mary.dfki.de/download/5.1/"/>
+        </package>
+        <depends language="en-GB" version="5.1"/>
+    </voice>
+</marytts-install>

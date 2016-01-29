@@ -1,0 +1,44 @@
+<html>
+<h1>TypeTalk - A MaryTTS frontend with batteries included<h1>
+<br />
+<h3>Content</h3>
+<ol>
+<li><a href="#summary">Summary</a></li>
+<li><a href="#ui">Using the UI</a></li>
+<li><a href="#configv">Configure voice</a></li>
+<li><a href="#configui">Configure the UI</a></li>
+</ol>
+
+<p>
+<h3><a name="summary">Summary</a></h3>
+TypeTalk provides easy access to MaryTTS. It includes the MaryTTS backend and several voices. At this moment only English voices are included.
+TypeTalk can be started with a minimized window in order to let you load it at login. 
+</p>
+
+<p>
+<h3><a name="ui">Using the UI</a></h3>
+TypeTalk has two areas for typing. A single-row bottom textfield to let you enter text. When the ui pops up this textfield grabs the focus and
+you can start typing. When you hit the enter key the text is moved to the top textarea and TypeTalk speeks the words you typed. This way of using
+the ui is similar to using a messaging ui. 
+</p>
+
+<p>
+The top textarea is meant for larger portions of text. When you hit the 'play' button on the bottom right the text is spoken to you. With the 'save'
+button you can save the output to a wave file. When TypeTalk encounters a word that the MaryTTS backend cannot pronounce it shows a little popup
+at the top-right corner of your screen with the unpronouncable word. You can correct the text in the top textarea to enable a complete message.    
+</p>
+
+<p>
+<h3><a name="configv">Configure voice</a></h3> 
+You can configure the by clicking <i>'Configure' - >'Configure voice'</i>. All configuration options in the dialog show a little help button with a explanation
+about the effect. You can listen to the effect through a textfield and play button at the bottom of the dialog.
+</p>
+
+<p>
+<h3><a name="configui">Configure the UI</a></h3> 
+You can configure the behavior of the ui by clicking <i>'Configure' -> 'Configure graphical interface'</i>. Through this dialog you can disable the splashscreen,
+the welcome screen at startup and whether the ui should be started minimized or not. In this dialog you can also change the keyboard shortcut for
+toggling the visibility of the ui. 
+</p>
+
+</html>
