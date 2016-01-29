@@ -61,7 +61,7 @@ public class GuiConfigDialog extends JDialog {
    public GuiConfigDialog(JFrame parent) {
       super(parent, MESSAGES.get("gui_config_title"), true);
       setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-      setSize(450, 350);
+      setSize(450, 450);
       ScreenPositioner.centerOnScreen(this);
       initActionsPanel();
       initConfigPanel(parent);
@@ -75,7 +75,8 @@ public class GuiConfigDialog extends JDialog {
             .setLayout(
                   new FormLayout(
                         new ColumnSpec[] { ColumnSpec.decode("default:grow"), ColumnSpec.decode("default:grow"),
-                              ColumnSpec.decode("right:default"), ColumnSpec.decode("right:default"), ColumnSpec
+                              ColumnSpec.decode("right:default"), ColumnSpec.decode("right:default"),
+                              ColumnSpec
                                     .decode("right:default") },
             new RowSpec[] { FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
                   FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
@@ -84,46 +85,50 @@ public class GuiConfigDialog extends JDialog {
                   FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
                   FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
                   FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-                  RowSpec.decode("default:grow"), }));
+                  FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
+                  FormFactory.DEFAULT_ROWSPEC, RowSpec.decode("default:grow"), }));
 
+      StringSeparator lafSeparator = new StringSeparator(MESSAGES.get("laf"));
+      configPanel.add(lafSeparator, "1, 7, 5, 1");
+      
       StringSeparator splashScreenSeparator = new StringSeparator(MESSAGES.get("splash_screen"));
-      configPanel.add(splashScreenSeparator, "1, 3, 5, 1");
+      configPanel.add(splashScreenSeparator, "1, 7, 5, 1");
 
       JLabel lblSplashScreenEnabled = new JLabel(MESSAGES.get("enabled"));
-      configPanel.add(lblSplashScreenEnabled, "3, 5");
+      configPanel.add(lblSplashScreenEnabled, "3, 9");
 
       chckbxSplashScreenEnabled = new JCheckBox();
       chckbxSplashScreenEnabled.setSelected(PROPERTIES.isSplashScreenEnabled());
-      configPanel.add(chckbxSplashScreenEnabled, "4, 5");
+      configPanel.add(chckbxSplashScreenEnabled, "4, 9");
 
       StringSeparator welcomeScreenSeparator = new StringSeparator(MESSAGES.get("welcome_screen"));
-      configPanel.add(welcomeScreenSeparator, "1, 7, 5, 1");
+      configPanel.add(welcomeScreenSeparator, "1, 11, 5, 1");
 
       JLabel lblShowWelcomeScreen = new JLabel(MESSAGES.get("enabled"));
-      configPanel.add(lblShowWelcomeScreen, "3, 9");
+      configPanel.add(lblShowWelcomeScreen, "3, 13");
 
       chckbxWelcomeScreenEnabled = new JCheckBox();
       chckbxWelcomeScreenEnabled.setSelected(PROPERTIES.isWelcomeScreenEnabled());
-      configPanel.add(chckbxWelcomeScreenEnabled, "4, 9");
+      configPanel.add(chckbxWelcomeScreenEnabled, "4, 13");
 
       StringSeparator startMinimizedSeparator = new StringSeparator(MESSAGES.get("start_minimized"));
-      configPanel.add(startMinimizedSeparator, "1, 11, 5, 1");
+      configPanel.add(startMinimizedSeparator, "1, 15, 5, 1");
 
       JLabel lblStartMinized = new JLabel(MESSAGES.get("enabled"));
-      configPanel.add(lblStartMinized, "3, 13");
+      configPanel.add(lblStartMinized, "3, 17");
 
       chckbxStartMinimized = new JCheckBox();
       chckbxStartMinimized.setSelected(PROPERTIES.isStartMinimized());
-      configPanel.add(chckbxStartMinimized, "4, 13");
+      configPanel.add(chckbxStartMinimized, "4, 17");
 
       StringSeparator nativeHookSeparator = new StringSeparator(MESSAGES.get("native_hook"));
-      configPanel.add(nativeHookSeparator, "1, 15, 5, 1");
+      configPanel.add(nativeHookSeparator, "1, 19, 5, 1");
 
       nativeHookLabel = new JLabel(getNativeHookText(nativeHookKeyCodes));
-      configPanel.add(nativeHookLabel, "2, 19");
+      configPanel.add(nativeHookLabel, "2, 23");
 
       JButton btnRecordNativeHook = new JButton(Icon.getIcon("/icons/pencil.png"));
-      configPanel.add(btnRecordNativeHook, "3, 19, 2, 1, fill, default");
+      configPanel.add(btnRecordNativeHook, "3, 23, 2, 1, fill, default");
       btnRecordNativeHook.addActionListener(e -> {
          RecordNativeHookDialog dialog = new RecordNativeHookDialog(parent);
          dialog.setVisible(true);
@@ -178,5 +183,9 @@ public class GuiConfigDialog extends JDialog {
    private String getNativeHookText(int[] nativeHookKeyCodes) {
       return Arrays.stream(nativeHookKeyCodes).mapToObj(kc -> NativeKeyEvent.getKeyText(kc))
             .collect(Collectors.joining(", "));
+   }
+   
+   public static void main(String[] args) {
+      new GuiConfigDialog(null).setVisible(true);
    }
 }
