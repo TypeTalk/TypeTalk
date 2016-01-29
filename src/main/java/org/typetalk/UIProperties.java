@@ -33,6 +33,7 @@ public class UIProperties {
    public static final String DEFAULT_VOICE = "DFKI_OBADIAH";
    public static final int DEFAULT_DOUBLE_CLICK_DELAY = 250;
    public static final int DEFAULT_TOAST_TIME = 3000;
+   public static final String DEFAULT_LAF = "DEFAULT";
 
    private static final String KEY_LANGUAGE = "language";
    private static final String KEY_COUNTRY = "country";
@@ -43,6 +44,7 @@ public class UIProperties {
    private static final String KEY_VOICE = "voice";
    private static final String KEY_DOUBLE_CLICK_DELAY = "doubleclickdelay";
    private static final String KEY_TOAST_TIME = "toasttime";
+   private static final String KEY_LAF = "lookandfeel";
 
    private static UIProperties instance;
    private boolean nativeHookEnabled = true;
@@ -151,5 +153,13 @@ public class UIProperties {
 
    public void setToastTime(int toastTime) {
       userPreferences.putInt(KEY_TOAST_TIME, toastTime);
+   }
+   
+   public String getLaf() {
+      return userPreferences.get(KEY_LAF, DEFAULT_LAF);
+   }
+
+   public void setLaf(String laf) {
+      userPreferences.put(KEY_LAF, laf);
    }
 }

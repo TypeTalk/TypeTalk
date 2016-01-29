@@ -24,7 +24,6 @@ import java.util.Locale;
 
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
@@ -106,28 +105,28 @@ public class Application {
             }
          }
 
-         if (UIManager.getSystemLookAndFeelClassName().contains("Metal")) {
-            setNimbusLaf();
-         } else {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            log.debug("Setting system look and feel: " + UIManager.getSystemLookAndFeelClassName());
+         if (PROPERTIES.getLaf().equals(UIProperties.DEFAULT_LAF)) {
+            if (UIManager.getSystemLookAndFeelClassName().contains("Metal")) {
+               PROPERTIES.setLaf("Nimbus");
+            } else {
+               for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                  if (info.getClassName().equals(UIManager.getSystemLookAndFeelClassName())) {
+                     PROPERTIES.setLaf(info.getName());
+                  }
+               }
+            }
+         }
+         
+         for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+            if(info.getName().equals(PROPERTIES.getLaf())) {
+               UIManager.setLookAndFeel(info.getClassName());
+               log.debug("Setting system look and feel: " + info.getClassName());
+            }
          }
       } catch (Exception e) {
          log.error("Could not set look and feel");
          log.debug(e.getMessage(), e);
       }
-   }
-
-   private static void setNimbusLaf() throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-         UnsupportedLookAndFeelException {
-      for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-         if ("Nimbus".equals(info.getName())) {
-            UIManager.setLookAndFeel(info.getClassName());
-            log.debug("Setting Nimbus look and feel");
-            break;
-         }
-      }
-      log.debug("Not able to set  look and feel");
    }
 
    @AllArgsConstructor

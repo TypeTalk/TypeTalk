@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -57,6 +58,7 @@ public class GuiConfigDialog extends JDialog {
    private JCheckBox chckbxWelcomeScreenEnabled;
    private JCheckBox chckbxStartMinimized;
    private JLabel nativeHookLabel;
+   private JComboBox<LookAndFeel> lafComboBox;
 
    public GuiConfigDialog(JFrame parent) {
       super(parent, MESSAGES.get("gui_config_title"), true);
@@ -90,7 +92,14 @@ public class GuiConfigDialog extends JDialog {
 
       StringSeparator lafSeparator = new StringSeparator(MESSAGES.get("laf"));
       configPanel.add(lafSeparator, "1, 7, 5, 1");
-      
+
+      LookAndFeel[] allLafs = LookAndFeel.getAll();
+      lafComboBox = new JComboBox<LookAndFeel>(allLafs);
+      LookAndFeel selectedLaf = Arrays.stream(allLafs).filter(l -> l.getName().equals(PROPERTIES.getLaf())).findFirst()
+            .get();
+      lafComboBox.setSelectedItem(selectedLaf);
+      configPanel.add(lafComboBox, "1, 9, 5, 1");
+
       StringSeparator splashScreenSeparator = new StringSeparator(MESSAGES.get("splash_screen"));
       configPanel.add(splashScreenSeparator, "1, 7, 5, 1");
 
@@ -174,17 +183,19 @@ public class GuiConfigDialog extends JDialog {
       PROPERTIES.setStartMinimized(chckbxStartMinimized.isSelected());
       PROPERTIES.setNativeHookEnabled(nativeHookKeyCodes.length > 0);
       PROPERTIES.setNativeHookKeyCodes(nativeHookKeyCodes);
+      PROPERTIES.setLaf(((LookAndFeel) lafComboBox.getSelectedItem()).getName());
    }
 
    private void checkSettingsChanged() {
-      settingsChanged = !Arrays.equals(PROPERTIES.getNativeHookKeyCodes(), nativeHookKeyCodes);
+      settingsChanged = !Arrays.equals(PROPERTIES.getNativeHookKeyCodes(), nativeHookKeyCodes)
+            || !((LookAndFeel) lafComboBox.getSelectedItem()).getName().equals(PROPERTIES.getLaf());
    }
 
    private String getNativeHookText(int[] nativeHookKeyCodes) {
       return Arrays.stream(nativeHookKeyCodes).mapToObj(kc -> NativeKeyEvent.getKeyText(kc))
             .collect(Collectors.joining(", "));
    }
-   
+
    public static void main(String[] args) {
       new GuiConfigDialog(null).setVisible(true);
    }
