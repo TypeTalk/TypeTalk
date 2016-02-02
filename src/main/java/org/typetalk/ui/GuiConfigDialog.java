@@ -30,6 +30,8 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 
 import org.jnativehook.keyboard.NativeKeyEvent;
@@ -77,7 +79,8 @@ public class GuiConfigDialog extends JDialog {
             .setLayout(
                   new FormLayout(
                         new ColumnSpec[] { ColumnSpec.decode("default:grow"), ColumnSpec.decode("default:grow"),
-                              ColumnSpec.decode("right:default"), ColumnSpec.decode("right:default"),
+                              ColumnSpec.decode("default:grow"), ColumnSpec.decode("right:default"),
+                              ColumnSpec.decode("right:default"),
                               ColumnSpec
                                     .decode("right:default") },
             new RowSpec[] { FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
@@ -94,11 +97,12 @@ public class GuiConfigDialog extends JDialog {
       configPanel.add(lafSeparator, "1, 7, 5, 1");
 
       LookAndFeel[] allLafs = LookAndFeel.getAll();
-      lafComboBox = new JComboBox<LookAndFeel>(allLafs);
+      // lafComboBox = new JComboBox<LookAndFeel>(allLafs);
+      lafComboBox = new JComboBox<LookAndFeel>();
       LookAndFeel selectedLaf = Arrays.stream(allLafs).filter(l -> l.getName().equals(PROPERTIES.getLaf())).findFirst()
             .get();
       lafComboBox.setSelectedItem(selectedLaf);
-      configPanel.add(lafComboBox, "1, 9, 5, 1");
+      configPanel.add(lafComboBox, "3, 9, 3, 1");
 
       StringSeparator splashScreenSeparator = new StringSeparator(MESSAGES.get("splash_screen"));
       configPanel.add(splashScreenSeparator, "1, 7, 5, 1");
@@ -114,21 +118,21 @@ public class GuiConfigDialog extends JDialog {
       configPanel.add(welcomeScreenSeparator, "1, 11, 5, 1");
 
       JLabel lblShowWelcomeScreen = new JLabel(MESSAGES.get("enabled"));
-      configPanel.add(lblShowWelcomeScreen, "3, 13");
+      configPanel.add(lblShowWelcomeScreen, "4, 13");
 
       chckbxWelcomeScreenEnabled = new JCheckBox();
       chckbxWelcomeScreenEnabled.setSelected(PROPERTIES.isWelcomeScreenEnabled());
-      configPanel.add(chckbxWelcomeScreenEnabled, "4, 13");
+      configPanel.add(chckbxWelcomeScreenEnabled, "5, 13");
 
       StringSeparator startMinimizedSeparator = new StringSeparator(MESSAGES.get("start_minimized"));
       configPanel.add(startMinimizedSeparator, "1, 15, 5, 1");
 
       JLabel lblStartMinized = new JLabel(MESSAGES.get("enabled"));
-      configPanel.add(lblStartMinized, "3, 17");
+      configPanel.add(lblStartMinized, "4, 17");
 
       chckbxStartMinimized = new JCheckBox();
       chckbxStartMinimized.setSelected(PROPERTIES.isStartMinimized());
-      configPanel.add(chckbxStartMinimized, "4, 17");
+      configPanel.add(chckbxStartMinimized, "5, 17");
 
       StringSeparator nativeHookSeparator = new StringSeparator(MESSAGES.get("native_hook"));
       configPanel.add(nativeHookSeparator, "1, 19, 5, 1");
@@ -137,7 +141,7 @@ public class GuiConfigDialog extends JDialog {
       configPanel.add(nativeHookLabel, "2, 23");
 
       JButton btnRecordNativeHook = new JButton(Icon.getIcon("/icons/pencil.png"));
-      configPanel.add(btnRecordNativeHook, "3, 23, 2, 1, fill, default");
+      configPanel.add(btnRecordNativeHook, "4, 23, 2, 1, fill, default");
       btnRecordNativeHook.addActionListener(e -> {
          RecordNativeHookDialog dialog = new RecordNativeHookDialog(parent);
          dialog.setVisible(true);
@@ -196,7 +200,9 @@ public class GuiConfigDialog extends JDialog {
             .collect(Collectors.joining(", "));
    }
 
-   public static void main(String[] args) {
+   public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
+      UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+      UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
       new GuiConfigDialog(null).setVisible(true);
    }
 }

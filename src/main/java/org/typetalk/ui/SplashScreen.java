@@ -34,6 +34,7 @@ public class SplashScreen extends JFrame {
    private JLabel messageLabel = new JLabel(MESSAGES.get("loading") + "...");
 
    public SplashScreen() {
+      setTitle(MESSAGES.get("client_window_title"));
       setResizable(false);
       setAlwaysOnTop(true);
       setUndecorated(true);

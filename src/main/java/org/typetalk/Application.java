@@ -44,6 +44,7 @@ public class Application {
    private static final Messages MESSAGES = Messages.getInstance();
 
    public static void main(String[] args) {
+      initAntiAliasing();
       loadLaf(args);
       setLocale();
 
@@ -83,6 +84,11 @@ public class Application {
       String country = PROPERTIES.getLocaleCountry();
       log.debug(String.format("Setting locale to: %s/%s", language, country));
       Locale.setDefault(new Locale(language, country));
+   }
+   
+   private static void initAntiAliasing() {
+      System.setProperty("awt.useSystemAAFontSettings", "lcd");
+      System.setProperty("swing.aatext", "true");
    }
 
    private static void loadLaf(String[] args) {

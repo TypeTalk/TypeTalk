@@ -42,6 +42,7 @@ public class WelcomeScreen extends JFrame {
    private int[] nativeHookKeyCodes = PROPERTIES.getNativeHookKeyCodes();
 
    public WelcomeScreen() {
+      setTitle(MESSAGES.get("client_window_title"));
       BorderLayout borderLayout = (BorderLayout) getContentPane().getLayout();
       borderLayout.setVgap(10);
       borderLayout.setHgap(30);
