@@ -97,8 +97,8 @@ public class GuiConfigDialog extends JDialog {
       configPanel.add(lafSeparator, "1, 7, 5, 1");
 
       LookAndFeel[] allLafs = LookAndFeel.getAll();
-      // lafComboBox = new JComboBox<LookAndFeel>(allLafs);
-      lafComboBox = new JComboBox<LookAndFeel>();
+      lafComboBox = new JComboBox<LookAndFeel>(allLafs);
+      // lafComboBox = new JComboBox<LookAndFeel>();
       LookAndFeel selectedLaf = Arrays.stream(allLafs).filter(l -> l.getName().equals(PROPERTIES.getLaf())).findFirst()
             .get();
       lafComboBox.setSelectedItem(selectedLaf);
@@ -200,7 +200,8 @@ public class GuiConfigDialog extends JDialog {
             .collect(Collectors.joining(", "));
    }
 
-   public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
+   public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
+         UnsupportedLookAndFeelException {
       UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
       UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
       new GuiConfigDialog(null).setVisible(true);

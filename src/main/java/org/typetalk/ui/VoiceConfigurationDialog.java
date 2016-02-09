@@ -78,13 +78,15 @@ public class VoiceConfigurationDialog extends JDialog {
    private void initActionsPanel() {
       JPanel actionPanel = new JPanel();
       getContentPane().add(actionPanel, BorderLayout.SOUTH);
-      FormLayout layout = new FormLayout(new ColumnSpec[] { ColumnSpec.decode("default:grow"),
-            FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC, FormFactory.RELATED_GAP_COLSPEC,
-            FormFactory.DEFAULT_COLSPEC, FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("max(40dlu;default)"),
-            FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC, FormFactory.RELATED_GAP_COLSPEC,
-            ColumnSpec.decode("max(40dlu;default)"), FormFactory.RELATED_GAP_COLSPEC,
-            ColumnSpec.decode("max(5dlu;default)"), }, new RowSpec[] { FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, RowSpec.decode("max(5dlu;default)"), });
+      FormLayout layout = new FormLayout(
+            new ColumnSpec[] { ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
+                  FormFactory.DEFAULT_COLSPEC, FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
+                  FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("max(40dlu;default)"),
+                  FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC, FormFactory.RELATED_GAP_COLSPEC,
+                  ColumnSpec.decode("max(40dlu;default)"), FormFactory.RELATED_GAP_COLSPEC,
+                  ColumnSpec.decode("max(5dlu;default)"), },
+            new RowSpec[] { FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
+                  RowSpec.decode("max(5dlu;default)"), });
       actionPanel.setLayout(layout);
 
       JButton btnCancel = new JButton(MESSAGES.get("cancel"));
@@ -125,7 +127,7 @@ public class VoiceConfigurationDialog extends JDialog {
       getContentPane().add(configPanel, BorderLayout.CENTER);
       configPanel.setLayout(new FormLayout(new ColumnSpec[] {
 
-      ColumnSpec.decode("max(61dlu;min):grow"), ColumnSpec.decode("max(140dlu;default)"),
+            ColumnSpec.decode("max(61dlu;min):grow"), ColumnSpec.decode("max(140dlu;default)"),
             FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("200px"), FormFactory.RELATED_GAP_COLSPEC,
 
             ColumnSpec.decode("max(30dlu;default)"),
@@ -139,20 +141,20 @@ public class VoiceConfigurationDialog extends JDialog {
             ColumnSpec.decode("max(30dlu;default)"), FormFactory.RELATED_GAP_COLSPEC,
             ColumnSpec.decode("max(30dlu;default)"), },
 
-      new RowSpec[] { FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
-            FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
-            FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
-            FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
-            FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
-            FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-            FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
-            FormFactory.DEFAULT_ROWSPEC, }));
+            new RowSpec[] { FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+                  FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
+                  FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+                  FormFactory.DEFAULT_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
+                  FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+                  FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
+                  FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+                  FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
+                  FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+                  FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
+                  FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+                  FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
+                  FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+                  FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, }));
 
       StringSeparator stringSeparator = new StringSeparator(MESSAGES.get("voice"));
       configPanel.add(stringSeparator, "1, 2, 18, 1");
@@ -257,7 +259,7 @@ public class VoiceConfigurationDialog extends JDialog {
       private void initPanel() {
          setLayout(new FormLayout(new ColumnSpec[] {
 
-         ColumnSpec.decode("max(140dlu;default)"), FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("200px"),
+               ColumnSpec.decode("max(140dlu;default)"), FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("200px"),
                FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("max(30dlu;default)"),
                FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC, FormFactory.RELATED_GAP_COLSPEC,
                ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
@@ -265,7 +267,7 @@ public class VoiceConfigurationDialog extends JDialog {
                ColumnSpec.decode("max(30dlu;default)"), FormFactory.RELATED_GAP_COLSPEC,
                ColumnSpec.decode("max(30dlu;default)"), },
 
-         new RowSpec[] { FormFactory.DEFAULT_ROWSPEC }));
+               new RowSpec[] { FormFactory.DEFAULT_ROWSPEC }));
 
          JLabel l = new JLabel(soundEffect.getName());
          add(l, "1, 1, left, top");
@@ -275,8 +277,10 @@ public class VoiceConfigurationDialog extends JDialog {
          add(enabledBox, "3, 1, left, top");
 
          JButton helpButton = new JButton(Icon.getIcon("/icons/help.png"));
-         helpButton.addActionListener(a -> JOptionPane.showMessageDialog(VoiceConfigurationDialog.this,
-               soundEffect.getHelpText(), soundEffect.getName(), JOptionPane.INFORMATION_MESSAGE));
+         helpButton.addActionListener(a -> {
+            JOptionPane.showMessageDialog(null, soundEffect.getHelpText(),
+                  soundEffect.getName(), JOptionPane.INFORMATION_MESSAGE);
+         });
          add(helpButton, "17, 1, center, top");
 
          JPanel levelsPanel = new JPanel();
@@ -292,8 +296,8 @@ public class VoiceConfigurationDialog extends JDialog {
          add(levelsPanel, cc.xyw(5, 1, 9, "fill, top"));
 
          levelPanels.stream().forEach(lp -> lp.getSpinner().setEnabled(enabledBox.isSelected()));
-         enabledBox.addChangeListener(c -> levelPanels.stream().forEach(
-               lp -> lp.getSpinner().setEnabled(enabledBox.isSelected())));
+         enabledBox.addChangeListener(
+               c -> levelPanels.stream().forEach(lp -> lp.getSpinner().setEnabled(enabledBox.isSelected())));
       }
    }
 
@@ -314,8 +318,8 @@ public class VoiceConfigurationDialog extends JDialog {
          nameLabel.setVerticalAlignment(SwingConstants.TOP);
          add(nameLabel, BorderLayout.WEST);
 
-         levelSpinner = new JSpinner(new SpinnerNumberModel(currentValue, defaultValues.get(1), defaultValues.get(2),
-               defaultValues.get(3)));
+         levelSpinner = new JSpinner(
+               new SpinnerNumberModel(currentValue, defaultValues.get(1), defaultValues.get(2), defaultValues.get(3)));
          levelSpinner.setValue(soundEffect.getLevel(name));
          add(levelSpinner, BorderLayout.EAST);
       }

@@ -57,12 +57,13 @@ public class SoundEffect {
          EFFECTS.add(createTractScaler());
          EFFECTS.add(createF0Add());
          EFFECTS.add(createF0Scale());
-         EFFECTS.add(createRobot());
-         EFFECTS.add(createWhisper());
-         EFFECTS.add(createStadium());
-         EFFECTS.add(createChorus());
+         EFFECTS.add(createRate());
+//         EFFECTS.add(createRobot());
+//         EFFECTS.add(createWhisper());
+//         EFFECTS.add(createStadium());
+//         EFFECTS.add(createChorus());
          EFFECTS.add(createFirFilter());
-         EFFECTS.add(createJetPilot());
+//         EFFECTS.add(createJetPilot());
       }
       return EFFECTS;
    }
