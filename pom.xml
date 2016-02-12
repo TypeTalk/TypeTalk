@@ -4,7 +4,7 @@
 
 	<groupId>org.typetalk</groupId>
 	<artifactId>typetalk</artifactId>
-	<version>1.0</version>
+	<version>${version}</version>
 	<packaging>jar</packaging>
 
 	<name>TypeTalk</name>
@@ -13,6 +13,8 @@
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<app.home>/opt/typetalk/</app.home>
+		<version>1.1</version>
 	</properties>
 
 	<build>
@@ -63,6 +65,56 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>rpm-maven-plugin</artifactId>
+				<version>2.0.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>rpm</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<copyright>2016, TypeTalk</copyright>
+					<group>Applications/Communications</group>
+					<description>TypeTalk, a MaryTTS frontend.</description>
+					<release>${version}</release>
+					<mappings>
+						<mapping>
+							<directory>${app.home}/lib</directory>
+							<dependency />
+							<artifact />
+						</mapping>
+						<mapping>
+							<directory>${app.home}/logs</directory>
+							<filemode>777</filemode>
+						</mapping>
+						<mapping>
+							<directory>${app.home}</directory>
+							<filemode>555</filemode>
+							<sources>
+								<source>
+									<location>${project.build.outputDirectory}/typetalk.sh</location>
+								</source>
+								<source>
+									<location>${project.build.outputDirectory}/typetalk.desktop</location>
+								</source>
+							</sources>
+						</mapping>
+						<mapping>
+							<directory>/usr/share/applications</directory>
+							<sources>
+								<softlinkSource>
+									<location>/opt/typetalk/typetalk.desktop</location>
+								</softlinkSource>
+							</sources>
+						</mapping>
+					</mappings>
+				</configuration>
 			</plugin>
 
 		</plugins>

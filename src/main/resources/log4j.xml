@@ -4,7 +4,7 @@
 <log4j:configuration debug="false" xmlns:log4j="http://jakarta.apache.org/log4j/">
 
 	<appender name="file" class="org.apache.log4j.RollingFileAppender">
-		<param name="File" value="typetalk.log" />
+		<param name="File" value="logs/typetalk.log" />
 		<param name="Append" value="true" />
 		<param name="MaxFileSize" value="5Mb" />
 		<param name="maxBackupIndex" value="5" />
