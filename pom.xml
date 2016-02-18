@@ -83,6 +83,9 @@
 					<group>Applications/Communications</group>
 					<description>TypeTalk, a MaryTTS frontend.</description>
 					<release>${version}</release>
+					<requires>
+						<require>java &gt;= 1.8</require>
+					</requires>
 					<mappings>
 						<mapping>
 							<directory>${app.home}/lib</directory>
