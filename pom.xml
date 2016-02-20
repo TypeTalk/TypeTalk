@@ -14,7 +14,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<app.home>/opt/typetalk/</app.home>
-		<version>1.1</version>
+		<version>1.2</version>
 	</properties>
 
 	<build>
