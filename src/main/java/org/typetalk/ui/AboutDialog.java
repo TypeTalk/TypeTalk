@@ -40,7 +40,7 @@ public class AboutDialog extends JDialog {
       setDefaultCloseOperation(DISPOSE_ON_CLOSE);
       setTitle(MESSAGES.get("client_window_title"));
 
-      setSize(610, 410);
+      setSize(610, 510);
       ScreenPositioner.centerOnScreen(this);
 
       JPanel topPanel = new JPanel();
