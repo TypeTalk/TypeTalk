@@ -35,6 +35,8 @@ import org.jnativehook.keyboard.NativeKeyEvent;
 import org.typetalk.Messages;
 import org.typetalk.UIProperties;
 
+import raging.goblin.swingutils.Icon;
+
 public class WelcomeScreen extends JFrame {
 
    private static final Messages MESSAGES = Messages.getInstance();
@@ -43,6 +45,7 @@ public class WelcomeScreen extends JFrame {
 
    public WelcomeScreen() {
       setTitle(MESSAGES.get("client_window_title"));
+      setIconImage(Icon.getIcon("/icons/sound.png").getImage());
       BorderLayout borderLayout = (BorderLayout) getContentPane().getLayout();
       borderLayout.setVgap(10);
       borderLayout.setHgap(30);

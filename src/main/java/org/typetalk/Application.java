@@ -29,13 +29,13 @@ import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.typetalk.speech.Speeker;
 import org.typetalk.ui.ClientWindow;
-import org.typetalk.ui.ScreenPositioner;
-import org.typetalk.ui.SplashScreen;
 import org.typetalk.ui.WelcomeScreen;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import marytts.exceptions.MaryConfigurationException;
+import raging.goblin.swingutils.ScreenPositioner;
+import raging.goblin.swingutils.SplashScreen;
 
 @Slf4j
 public class Application {
@@ -45,10 +45,11 @@ public class Application {
 
    public static void main(String[] args) {
       initAntiAliasing();
+      disablePaintSliderValue();
       loadLaf(args);
       setLocale();
 
-      SplashScreen splashScreen = new SplashScreen();
+      SplashScreen splashScreen = new SplashScreen("TypeTalk", "/icons/sound.png");
       ScreenPositioner.centerOnScreen(splashScreen);
       splashScreen.setVisible(PROPERTIES.isSplashScreenEnabled());
 
@@ -133,6 +134,10 @@ public class Application {
          log.error("Could not set look and feel");
          log.debug(e.getMessage(), e);
       }
+   }
+
+   private static void disablePaintSliderValue() {
+      UIManager.put("Slider.paintValue", false);      
    }
 
    @AllArgsConstructor

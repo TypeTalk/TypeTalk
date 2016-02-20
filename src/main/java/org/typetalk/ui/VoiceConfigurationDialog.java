@@ -37,10 +37,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
-import javax.swing.JSpinner;
 import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingConstants;
 
 import org.typetalk.Messages;
 import org.typetalk.speech.SoundEffect;
@@ -55,6 +52,10 @@ import com.jgoodies.forms.layout.RowSpec;
 import lombok.Getter;
 import marytts.LocalMaryInterface;
 import marytts.util.data.audio.AudioPlayer;
+import raging.goblin.swingutils.DoubleSlider;
+import raging.goblin.swingutils.Icon;
+import raging.goblin.swingutils.ScreenPositioner;
+import raging.goblin.swingutils.StringSeparator;
 
 public class VoiceConfigurationDialog extends JDialog {
 
@@ -69,7 +70,7 @@ public class VoiceConfigurationDialog extends JDialog {
    public VoiceConfigurationDialog(JFrame parent) {
       super(parent, MESSAGES.get("voice_config_title"), true);
       setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-      setSize(950, 850);
+      setSize(1000, 550);
       ScreenPositioner.centerOnScreen(this);
       initActionsPanel();
       initConfigPanel();
@@ -127,8 +128,8 @@ public class VoiceConfigurationDialog extends JDialog {
       getContentPane().add(configPanel, BorderLayout.CENTER);
       configPanel.setLayout(new FormLayout(new ColumnSpec[] {
 
-            ColumnSpec.decode("max(61dlu;min):grow"), ColumnSpec.decode("max(140dlu;default)"),
-            FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("200px"), FormFactory.RELATED_GAP_COLSPEC,
+            ColumnSpec.decode("max(61dlu;min)"), ColumnSpec.decode("max(100dlu;default)"),
+            FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("center:150px"), FormFactory.RELATED_GAP_COLSPEC,
 
             ColumnSpec.decode("max(30dlu;default)"),
 
@@ -138,17 +139,13 @@ public class VoiceConfigurationDialog extends JDialog {
 
             FormFactory.RELATED_GAP_COLSPEC,
 
-            ColumnSpec.decode("max(30dlu;default)"), FormFactory.RELATED_GAP_COLSPEC,
-            ColumnSpec.decode("max(30dlu;default)"), },
+            ColumnSpec.decode("max(15dlu;default)"), FormFactory.RELATED_GAP_COLSPEC,
+            ColumnSpec.decode("max(15dlu;default)"), FormFactory.RELATED_GAP_COLSPEC },
 
             new RowSpec[] { FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
                   FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
                   FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
                   FormFactory.DEFAULT_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
-                  FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-                  FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
-                  FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
-                  FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
                   FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
                   FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
                   FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
@@ -175,7 +172,7 @@ public class VoiceConfigurationDialog extends JDialog {
 
       configPanel.add(new JLabel(MESSAGES.get("name")), "2, 8, 1, 1");
       configPanel.add(new JLabel(MESSAGES.get("enabled")), "4, 8, 1, 1");
-      configPanel.add(new JLabel(MESSAGES.get("parameters")), "6, 8, 8, 1");
+      configPanel.add(new JLabel(MESSAGES.get("parameters")), "6, 8, 8, 1, left, default");
 
       configPanel.add(new JLabel(" "), "2, 10, 1, 1");
 
@@ -189,10 +186,10 @@ public class VoiceConfigurationDialog extends JDialog {
          }
       }
 
-      configPanel.add(new StringSeparator(MESSAGES.get("preview")), "1, 34, 18, 1");
+      configPanel.add(new StringSeparator(MESSAGES.get("preview")), "1, 22, 18, 1");
 
       JTextField previewField = new JTextField(MESSAGES.get("preview_text"));
-      configPanel.add(previewField, "2, 36, 13, 1");
+      configPanel.add(previewField, "2, 24, 13, 1");
 
       JButton previewButton = new JButton(Icon.getIcon("/icons/control_play.png"));
       previewButton.addActionListener(a -> {
@@ -211,7 +208,7 @@ public class VoiceConfigurationDialog extends JDialog {
                   MESSAGES.get("error"), JOptionPane.ERROR_MESSAGE);
          }
       });
-      configPanel.add(previewButton, "18, 36, center, center");
+      configPanel.add(previewButton, "18, 24, center, center");
    }
 
    private void setDefaults() {
@@ -237,7 +234,7 @@ public class VoiceConfigurationDialog extends JDialog {
 
       public void setDefaults() {
          enabledBox.setSelected(false);
-         levelPanels.stream().forEach(lp -> lp.setDefaults());
+         levelPanels.stream().forEach(lp -> lp.setDefaultLevel());
       }
 
       public void saveEffect() {
@@ -246,7 +243,7 @@ public class VoiceConfigurationDialog extends JDialog {
       }
 
       public String getEffectString() {
-         List<Double> values = levelPanels.stream().map(lp -> ((Double) lp.getSpinner().getValue()))
+         List<Double> values = levelPanels.stream().map(lp -> (lp.getLevelSlider().getDoubleValue()))
                .collect(Collectors.toList());
          return String.format(soundEffect.getFormat(), values.toArray());
       }
@@ -259,13 +256,19 @@ public class VoiceConfigurationDialog extends JDialog {
       private void initPanel() {
          setLayout(new FormLayout(new ColumnSpec[] {
 
-               ColumnSpec.decode("max(140dlu;default)"), FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("200px"),
-               FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("max(30dlu;default)"),
+               ColumnSpec.decode("max(100dlu;default)"), FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("150px"),
+               FormFactory.RELATED_GAP_COLSPEC,
+
+               ColumnSpec.decode("max(30dlu;default)"),
+
                FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC, FormFactory.RELATED_GAP_COLSPEC,
                ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC, FormFactory.DEFAULT_COLSPEC,
-               FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
-               ColumnSpec.decode("max(30dlu;default)"), FormFactory.RELATED_GAP_COLSPEC,
-               ColumnSpec.decode("max(30dlu;default)"), },
+               FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("default:grow"),
+
+               FormFactory.RELATED_GAP_COLSPEC,
+
+               ColumnSpec.decode("max(15dlu;default)"), FormFactory.RELATED_GAP_COLSPEC,
+               ColumnSpec.decode("max(15dlu;default)") },
 
                new RowSpec[] { FormFactory.DEFAULT_ROWSPEC }));
 
@@ -274,66 +277,85 @@ public class VoiceConfigurationDialog extends JDialog {
 
          enabledBox = new JCheckBox();
          enabledBox.setSelected(soundEffect.isEnabled());
-         add(enabledBox, "3, 1, left, top");
+         enabledBox.addChangeListener(cl -> levelPanels.forEach(lp -> lp.setEnabled(enabledBox.isSelected())));
+         add(enabledBox, "3, 1, center, top");
 
          JButton helpButton = new JButton(Icon.getIcon("/icons/help.png"));
-         helpButton.addActionListener(a -> {
-            JOptionPane.showMessageDialog(null, soundEffect.getHelpText(),
-                  soundEffect.getName(), JOptionPane.INFORMATION_MESSAGE);
+         helpButton.addActionListener(al -> {
+            JOptionPane.showMessageDialog(null, soundEffect.getHelpText(), soundEffect.getName(),
+                  JOptionPane.INFORMATION_MESSAGE);
          });
          add(helpButton, "17, 1, center, top");
 
          JPanel levelsPanel = new JPanel();
          levelsPanel.setLayout(new BoxLayout(levelsPanel, BoxLayout.PAGE_AXIS));
-         List<String> levelKeys = soundEffect.getLevelKeys();
-         for (int i = 0; i < soundEffect.getLevelKeys().size(); i++) {
-            LevelPanel levelPanel = new LevelPanel(soundEffect, levelKeys.get(i),
-                  soundEffect.getLevel(levelKeys.get(i)), soundEffect.getDefaultLevels().get(levelKeys.get(i)));
+         List<String> subEffectsKeys = soundEffect.getSubEffectKeys();
+         for (int i = 0; i < subEffectsKeys.size(); i++) {
+            LevelPanel levelPanel = new LevelPanel(soundEffect, subEffectsKeys.get(i));
             levelsPanel.add(levelPanel);
             levelPanels.add(levelPanel);
          }
          CellConstraints cc = new CellConstraints();
-         add(levelsPanel, cc.xyw(5, 1, 9, "fill, top"));
-
-         levelPanels.stream().forEach(lp -> lp.getSpinner().setEnabled(enabledBox.isSelected()));
-         enabledBox.addChangeListener(
-               c -> levelPanels.stream().forEach(lp -> lp.getSpinner().setEnabled(enabledBox.isSelected())));
+         add(levelsPanel, cc.xyw(5, 1, 10, "fill, top"));
+         levelPanels.forEach(lp -> lp.setEnabled(enabledBox.isSelected()));
       }
    }
 
    private class LevelPanel extends JPanel {
 
       private SoundEffect soundEffect;
-      private JSpinner levelSpinner;
-      private List<Double> defaultValues;
-      private String name;
+      private String subEffectKey;
+      private JLabel lowerBoundLabel;
+      private JLabel higherBoundLabel;
+      private JLabel subEffectNameLabel;
 
-      public LevelPanel(SoundEffect soundEffect, String name, Double currentValue, List<Double> defaultValues) {
+      @Getter
+      private DoubleSlider levelSlider;
+
+      public LevelPanel(SoundEffect soundEffect, String subEffectKey) {
          this.soundEffect = soundEffect;
-         this.defaultValues = defaultValues;
-         this.name = name;
-         this.setLayout(new BorderLayout());
-
-         JLabel nameLabel = new JLabel(name);
-         nameLabel.setVerticalAlignment(SwingConstants.TOP);
-         add(nameLabel, BorderLayout.WEST);
-
-         levelSpinner = new JSpinner(
-               new SpinnerNumberModel(currentValue, defaultValues.get(1), defaultValues.get(2), defaultValues.get(3)));
-         levelSpinner.setValue(soundEffect.getLevel(name));
-         add(levelSpinner, BorderLayout.EAST);
+         this.subEffectKey = subEffectKey;
+         initUi();
       }
 
-      public void setDefaults() {
-         levelSpinner.setValue(defaultValues.get(0));
+      @Override
+      public void setEnabled(boolean enabled) {
+         lowerBoundLabel.setEnabled(enabled);
+         higherBoundLabel.setEnabled(enabled);
+         subEffectNameLabel.setEnabled(enabled);
+         levelSlider.setEnabled(enabled);
+      }
+
+      public void setDefaultLevel() {
+         levelSlider.setDoubleValue(soundEffect.getDefaultLevel(subEffectKey));
+      }
+
+      private void initUi() {
+         this.setLayout(
+               new FormLayout(new ColumnSpec[] { ColumnSpec.decode("default"), ColumnSpec.decode("default"),ColumnSpec.decode("default:grow"),
+                     ColumnSpec.decode("default") }, new RowSpec[] { FormFactory.DEFAULT_ROWSPEC }));
+         lowerBoundLabel = new JLabel(soundEffect.getSubEffects().get(subEffectKey).getLowerBoundName());
+         higherBoundLabel = new JLabel(soundEffect.getSubEffects().get(subEffectKey).getHigherBoundName());
+         subEffectNameLabel = new JLabel(soundEffect.getSubEffects().get(subEffectKey).getName() + ": ");
+         levelSlider = new DoubleSlider(soundEffect.getLevel(subEffectKey), soundEffect.getMinimumValue(subEffectKey),
+               soundEffect.getMaximumValue(subEffectKey), soundEffect.getStepSize(subEffectKey));
+         levelSlider.addChangeListener(cl -> saveValue());
+         add(lowerBoundLabel, "1, 1");
+         add(higherBoundLabel, "4, 1");
+         if(soundEffect.getSubEffects().size() == 1) {
+            add(levelSlider, "2, 1, 2, 1");
+         } else {
+            add(subEffectNameLabel, "2 ,1");
+            add(levelSlider, "3, 1");
+         }
       }
 
       public void saveValue() {
-         soundEffect.setLevel(name, (Double) levelSpinner.getValue());
+         soundEffect.setLevel(subEffectKey, levelSlider.getDoubleValue());
       }
+   }
 
-      public JSpinner getSpinner() {
-         return levelSpinner;
-      }
+   public static void main(String[] args) {
+      new VoiceConfigurationDialog(null).setVisible(true);
    }
 }

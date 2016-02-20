@@ -44,6 +44,9 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 import lombok.Getter;
+import raging.goblin.swingutils.Icon;
+import raging.goblin.swingutils.ScreenPositioner;
+import raging.goblin.swingutils.StringSeparator;
 
 public class GuiConfigDialog extends JDialog {
 

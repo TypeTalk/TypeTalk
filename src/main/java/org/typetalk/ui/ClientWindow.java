@@ -77,6 +77,9 @@ import org.typetalk.speech.Speeker.EndOfSpeechListener;
 
 import lombok.extern.slf4j.Slf4j;
 import marytts.exceptions.MaryConfigurationException;
+import raging.goblin.swingutils.HelpBrowser;
+import raging.goblin.swingutils.Icon;
+import raging.goblin.swingutils.ScreenPositioner;
 
 @Slf4j
 public class ClientWindow extends JFrame implements EndOfSpeechListener {
@@ -155,6 +158,7 @@ public class ClientWindow extends JFrame implements EndOfSpeechListener {
 
    private void initGui() {
       setSize(600, 400);
+      setIconImage(Icon.getIcon("/icons/sound.png").getImage());
       ScreenPositioner.centerOnScreen(this);
       BorderLayout layout = new BorderLayout(10, 10);
       getContentPane().setLayout(layout);
@@ -347,7 +351,10 @@ public class ClientWindow extends JFrame implements EndOfSpeechListener {
 
       JMenuItem helpItem = new JMenuItem(MESSAGES.get("help"), Icon.getIcon("/icons/help.png"));
       helpItem.setMnemonic(KeyEvent.VK_F1);
-      helpItem.addActionListener(a -> HelpBrowser.getInstance().setVisible(true));
+      helpItem.addActionListener(a -> HelpBrowser
+            .getInstance("/help.html", MESSAGES.get("client_window_title") + " - " + MESSAGES.get("help"),
+                  MESSAGES.get("load_help_error"), MESSAGES.get("error"))
+            .setVisible(true));
       helpMenu.add(helpItem);
 
       JMenuItem aboutItem = new JMenuItem(MESSAGES.get("about"), Icon.getIcon("/icons/star.png"));

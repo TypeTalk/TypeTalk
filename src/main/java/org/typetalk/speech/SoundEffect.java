@@ -20,15 +20,14 @@
 package org.typetalk.speech;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 import org.typetalk.Messages;
+
+import com.google.common.collect.ImmutableMap;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -39,7 +38,7 @@ import lombok.Getter;
 public class SoundEffect {
 
    public enum Effect {
-      TRACT_SCALER, F0_SCALE, F0_ADD, RATE, ROBOT, WHISPER, STADIUM, CHORUS, FIR_FILTER, JET_PILOT
+      TRACT_SCALER, F0_SCALE, F0_ADD, RATE, ROBOT, WHISPER, STADIUM, CHORUS, FIR_FILTER
    };
 
    private static final Preferences PREFERENCES = Preferences.userNodeForPackage(SoundEffect.class);
@@ -50,7 +49,7 @@ public class SoundEffect {
    private String name;
    private String helpText;
    private String format;
-   private Map<String, List<Double>> defaultLevels;
+   private Map<String, SubEffect> subEffects;
 
    public static List<SoundEffect> getAllSoundEffects() {
       if (EFFECTS.isEmpty()) {
@@ -58,12 +57,6 @@ public class SoundEffect {
          EFFECTS.add(createF0Add());
          EFFECTS.add(createF0Scale());
          EFFECTS.add(createRate());
-//         EFFECTS.add(createRobot());
-//         EFFECTS.add(createWhisper());
-//         EFFECTS.add(createStadium());
-//         EFFECTS.add(createChorus());
-         EFFECTS.add(createFirFilter());
-//         EFFECTS.add(createJetPilot());
       }
       return EFFECTS;
    }
@@ -73,24 +66,38 @@ public class SoundEffect {
             .collect(Collectors.joining("+"));
    }
 
-   public List<String> getLevelKeys() {
-      return new ArrayList<>(defaultLevels.keySet());
+   public List<String> getSubEffectKeys() {
+      return subEffects.keySet().stream().map(k -> subEffects.get(k).getKey()).collect(Collectors.toList());
    }
 
    public void setLevel(String key, double value) {
-      if (defaultLevels.containsKey(key)) {
+      if (subEffects.containsKey(key)) {
          PREFERENCES.putDouble(effect + "_" + key, value);
       }
    }
 
    public double getLevel(String key) {
-      return PREFERENCES.getDouble(effect + "_" + key, defaultLevels.get(key).get(0));
+      return PREFERENCES.getDouble(effect + "_" + key, subEffects.get(key).getDefaultValue());
+   }
+
+   public double getDefaultLevel(String key) {
+      return subEffects.get(key).getDefaultValue();
+   }
+
+   public double getMinimumValue(String key) {
+      return subEffects.get(key).getMinimumValue();
+   }
+
+   public double getMaximumValue(String key) {
+      return subEffects.get(key).getMaximumValue();
+   }
+
+   public double getStepSize(String key) {
+      return subEffects.get(key).getStepSize();
    }
 
    public void setDefaultLevels() {
-      for (String key : defaultLevels.keySet()) {
-         setLevel(key, defaultLevels.get(key).get(0));
-      }
+      subEffects.keySet().forEach(k -> setLevel(k, subEffects.get(k).getDefaultValue()));
    }
 
    public boolean isEnabled() {
@@ -102,76 +109,51 @@ public class SoundEffect {
    }
 
    private static SoundEffect createTractScaler() {
+      SubEffect subEffect = new SubEffect(1.5, 0.25, 4.0, 0.1, "amount", MESSAGES.get("tract_scaler_subeffect_name"),
+            MESSAGES.get("tract_scaler_subeffect_lowerboundname"),
+            MESSAGES.get("tract_scaler_subeffect_higherboundname"));
       return new SoundEffect(Effect.TRACT_SCALER, MESSAGES.get("tract_scaler"), MESSAGES.get("tract_scaler_help"),
-            "TractScaler(amount=%.2f;)", createDefaultLevelsMap(Arrays.asList("amount"),
-                  Arrays.asList(Arrays.asList(1.5, 0.25, 4.0, 0.1))));
-   }
-
-   private static SoundEffect createJetPilot() {
-      return new SoundEffect(Effect.JET_PILOT, MESSAGES.get("jet_pilot"), MESSAGES.get("jet_pilot_help"), "JetPilot",
-            new HashMap<>());
+            "TractScaler(amount=%.2f;)", ImmutableMap.of(subEffect.getKey(), subEffect));
    }
 
    private static SoundEffect createF0Scale() {
+      SubEffect subEffect = new SubEffect(2.0, 0.0, 3.0, 0.1, "f0Scale", MESSAGES.get("f0_scaling"),
+            MESSAGES.get("f0_scaling_subeffect_lowerboundname"), MESSAGES.get("f0_scaling_subeffect_higherboundname"));
       return new SoundEffect(Effect.F0_SCALE, MESSAGES.get("f0_scaling"), MESSAGES.get("f0_scaling_help"),
-            "F0Scale(f0Scale=%.2f;)", createDefaultLevelsMap(Arrays.asList("f0Scale"),
-                  Arrays.asList(Arrays.asList(2.0, 0.0, 3.0, 0.1))));
+            "F0Scale(f0Scale=%.2f;)", ImmutableMap.of(subEffect.getKey(), subEffect));
    }
 
    private static SoundEffect createF0Add() {
+      SubEffect subEffect = new SubEffect(50.0, -300.0, 300.0, 10.0, "f0_add", MESSAGES.get("f0_add"),
+            MESSAGES.get("f0_add_subeffect_lowerboundname"), MESSAGES.get("f0_add_subeffect_higherboundname"));
       return new SoundEffect(Effect.F0_ADD, MESSAGES.get("f0_add"), MESSAGES.get("f0_add_help"), "F0Add(f0Add=%.2f;)",
-            createDefaultLevelsMap(Arrays.asList("f0Add"), Arrays.asList(Arrays.asList(50.0, -300.0, 300.0, 10.0))));
+            ImmutableMap.of(subEffect.getKey(), subEffect));
    }
 
    private static SoundEffect createRate() {
+      SubEffect subEffect = new SubEffect(1.5, 0.1, 3.0, 0.1, "durScale", MESSAGES.get("rate"),
+            MESSAGES.get("rate_subeffect_lowerboundname"), MESSAGES.get("rate_subeffect_higherboundname"));
       return new SoundEffect(Effect.RATE, MESSAGES.get("rate"), MESSAGES.get("rate_help"), "Rate(durScale=%.2f;)",
-            createDefaultLevelsMap(Arrays.asList("durScale"), Arrays.asList(Arrays.asList(1.5, 0.1, 3.0, 0.1))));
-   }
-
-   private static SoundEffect createRobot() {
-      return new SoundEffect(Effect.ROBOT, MESSAGES.get("robot"), MESSAGES.get("robot_help"), "Robot(amount=%.2f;)",
-            createDefaultLevelsMap(Arrays.asList("amount"), Arrays.asList(Arrays.asList(100.0, 0.0, 100.0, 10.0))));
-   }
-
-   private static SoundEffect createWhisper() {
-      return new SoundEffect(Effect.WHISPER, MESSAGES.get("whisper"), MESSAGES.get("whisper_help"),
-            "Whisper(amount=%.2f;)", createDefaultLevelsMap(Arrays.asList("amount"),
-                  Arrays.asList(Arrays.asList(100.0, 0.0, 100.0, 10.0))));
-   }
-
-   private static SoundEffect createStadium() {
-      return new SoundEffect(Effect.STADIUM, MESSAGES.get("stadium"), MESSAGES.get("stadium_help"),
-            "Stadium(amount=%.2f;)", createDefaultLevelsMap(Arrays.asList("amount"),
-                  Arrays.asList(Arrays.asList(100.0, 0.0, 200.0, 10.0))));
-   }
-
-   private static SoundEffect createChorus() {
-      return new SoundEffect(Effect.CHORUS, MESSAGES.get("chorus"), MESSAGES.get("chorus_help"),
-            "Chorus(delay1=%.2f; amp1=%.2f; delay2=%.2f; amp2=%.2f; delay3=%.2f; amp3=%.2f;)", createDefaultLevelsMap(
-                  Arrays.asList("delay1", "amp1", "delay2", "amp2", "delay3", "amp3"),
-                  Arrays.asList(Arrays.asList(466.0, 0.0, 5000.0, 100.0), Arrays.asList(0.54, -5.0, 5.0, 0.1),
-                        Arrays.asList(600.0, 0.0, 5000.0, 100.0), Arrays.asList(-0.10, -5.0, 5.0, 0.1),
-                        Arrays.asList(250.0, 0.0, 5000.0, 100.0), Arrays.asList(0.30, -5.0, 5.0, 0.1))));
-   }
-
-   private static SoundEffect createFirFilter() {
-      return new SoundEffect(Effect.FIR_FILTER, MESSAGES.get("fir_filter"), MESSAGES.get("fir_filter_help"),
-            "FIRFilter(type=%.2f; fc1=%.2f; fc2=%.2f;)", createDefaultLevelsMap(
-                  Arrays.asList("type", "fc1", "fc2"),
-                  Arrays.asList(Arrays.asList(3.0, 1.0, 4.0, 1.0), Arrays.asList(500.0, 0.0, 20000.0, 100.0),
-                        Arrays.asList(2000.0, 0.0, 20000.0, 100.0))));
-   }
-
-   private static Map<String, List<Double>> createDefaultLevelsMap(List<String> keys, List<List<Double>> values) {
-      Map<String, List<Double>> defaultLevels = new LinkedHashMap<>();
-      for (int i = 0; i < keys.size(); i++) {
-         defaultLevels.put(keys.get(i), values.get(i));
-      }
-      return defaultLevels;
+            ImmutableMap.of(subEffect.getKey(), subEffect));
    }
 
    private String getMaryTTSString() {
-      List<Double> values = defaultLevels.keySet().stream().map(k -> getLevel(k)).collect(Collectors.toList());
+      List<Double> values = subEffects.keySet().stream().map(k -> getLevel(k)).collect(Collectors.toList());
       return String.format(format, values.toArray());
+   }
+
+   @AllArgsConstructor
+   @Getter
+   public static class SubEffect {
+
+      private double defaultValue;
+      private double minimumValue;
+      private double maximumValue;
+      private double stepSize;
+      private String key;
+      private String name;
+      private String lowerBoundName;
+      private String higherBoundName;
+
    }
 }

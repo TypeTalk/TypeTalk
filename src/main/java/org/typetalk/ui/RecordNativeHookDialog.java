@@ -46,6 +46,8 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
+import raging.goblin.swingutils.ScreenPositioner;
+
 public class RecordNativeHookDialog extends JDialog {
 
    private static final Messages MESSAGES = Messages.getInstance();

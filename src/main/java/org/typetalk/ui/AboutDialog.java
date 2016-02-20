@@ -28,6 +28,9 @@ import javax.swing.JPanel;
 
 import org.typetalk.Messages;
 
+import raging.goblin.swingutils.Icon;
+import raging.goblin.swingutils.ScreenPositioner;
+
 public class AboutDialog extends JDialog {
 
    private static final Messages MESSAGES = Messages.getInstance();
