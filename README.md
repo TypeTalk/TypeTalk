@@ -16,3 +16,5 @@ Follow instructions from https://projectlombok.org/ to setup IDE.
 
 #2. Usage
 Download the latest release from [https://github.com/TypeTalk/TypeTalk](https://github.com/TypeTalk/TypeTalk) and run it with: `java -jar TypeTalk.one-jar.jar` 
+
+
