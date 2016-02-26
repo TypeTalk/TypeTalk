@@ -9,11 +9,18 @@
 
 	<name>TypeTalk</name>
 	<url>http://typetalk.github.io/TypeTalk</url>
+	<description>A MaryTTS frontend with batteries included</description>
+
+	<organization>
+		<name>TypeTalk</name>
+		<url>http://typetalk.github.io/TypeTalk</url>
+	</organization>
 
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<app.home>/opt/typetalk/</app.home>
+		<artifact>TypeTalk.one-jar.jar</artifact>
+		<app.home>/opt/typetalk</app.home>
 		<version>1.2</version>
 	</properties>
 
@@ -87,15 +94,17 @@
 						<require>java &gt;= 1.8</require>
 					</requires>
 					<mappings>
+
 						<mapping>
 							<directory>${app.home}/lib</directory>
-							<dependency />
-							<artifact />
+							<filemode>555</filemode>
+							<sources>
+								<source>
+									<location>${project.build.directory}/${artifact}</location>
+								</source>
+							</sources>
 						</mapping>
-						<mapping>
-							<directory>${app.home}/logs</directory>
-							<filemode>777</filemode>
-						</mapping>
+
 						<mapping>
 							<directory>${app.home}</directory>
 							<filemode>555</filemode>
@@ -111,16 +120,98 @@
 								</source>
 							</sources>
 						</mapping>
+
+						<mapping>
+							<directory>${app.home}/logs</directory>
+							<filemode>777</filemode>
+						</mapping>
+
 						<mapping>
 							<directory>/usr/share/applications</directory>
 							<sources>
 								<softlinkSource>
-									<location>/opt/typetalk/typetalk.desktop</location>
+									<location>${app.home}/typetalk.desktop</location>
 								</softlinkSource>
 							</sources>
 						</mapping>
+
+						<mapping>
+							<directory>/var/log</directory>
+							<sources>
+								<softlinkSource>
+									<location>${app.home}/logs/typetalk.log</location>
+								</softlinkSource>
+							</sources>
+						</mapping>
+
 					</mappings>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>jdeb</artifactId>
+				<groupId>org.vafer</groupId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>jdeb</goal>
+						</goals>
+						<configuration>
+							<dataSet>
+
+								<data>
+									<type>file</type>
+									<src>${project.build.directory}/${artifact}</src>
+									<mapper>
+										<type>perm</type>
+										<prefix>${app.home}/lib</prefix>
+										<filemode>555</filemode>
+									</mapper>
+								</data>
+
+								<data>
+									<type>template</type>
+									<paths>
+										<path>${app.home}/logs</path>
+									</paths>
+									<mapper>
+										<type>perm</type>
+										<filemode>777</filemode>
+									</mapper>
+								</data>
+
+								<data>
+									<type>files</type>
+									<paths>
+										<path>${project.build.outputDirectory}/typetalk.sh</path>
+										<path>${project.build.outputDirectory}/typetalk.desktop</path>
+										<path>${project.build.outputDirectory}/icons/sound.png</path>
+									</paths>
+									<dst>${app.home}</dst>
+									<mapper>
+										<type>perm</type>
+										<filemode>555</filemode>
+									</mapper>
+								</data>
+
+								<data>
+									<type>link</type>
+									<linkName>/usr/share/applications/typetalk.desktop</linkName>
+									<linkTarget>${app.home}/typetalk.desktop</linkTarget>
+								</data>
+
+								<data>
+									<type>link</type>
+									<linkName>/var/log/typetalk.log</linkName>
+									<linkTarget>${app.home}/logs/typetalk.log</linkTarget>
+								</data>
+
+							</dataSet>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 
 		</plugins>

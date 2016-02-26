@@ -2,4 +2,4 @@
 
 cd /opt/typetalk
 
-java -cp "lib/*" org.typetalk.Application
+java -jar lib/TypeTalk.one-jar.jar

@@ -1,0 +1,8 @@
+Package: typetalk
+Version: [[version]]
+Section: misc
+Priority: optional
+Architecture: all
+Maintainer: Raging Goblin <raginggoblin@xs4all.nl>
+Description: [[description]]
+Depends: java8-runtime
