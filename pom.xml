@@ -253,31 +253,6 @@
 		</dependency>
 		<dependency>
 			<groupId>de.dfki.mary</groupId>
-			<artifactId>voice-cmu-slt-hsmm</artifactId>
-			<version>5.2-beta2</version>
-		</dependency>
-		<dependency>
-			<groupId>de.dfki.mary</groupId>
-			<artifactId>voice-cmu-bdl-hsmm</artifactId>
-			<version>5.1</version>
-		</dependency>
-		<dependency>
-			<groupId>de.dfki.mary</groupId>
-			<artifactId>voice-cmu-rms-hsmm</artifactId>
-			<version>5.1</version>
-		</dependency>
-		<dependency>
-			<groupId>de.dfki.mary</groupId>
-			<artifactId>voice-dfki-obadiah-hsmm</artifactId>
-			<version>5.1</version>
-		</dependency>
-		<dependency>
-			<groupId>de.dfki.mary</groupId>
-			<artifactId>voice-dfki-poppy-hsmm</artifactId>
-			<version>5.1</version>
-		</dependency>
-		<dependency>
-			<groupId>de.dfki.mary</groupId>
 			<artifactId>marytts-lang-en</artifactId>
 			<version>5.2-beta2</version>
 		</dependency>
@@ -290,6 +265,41 @@
 			<groupId>de.dfki.mary</groupId>
 			<artifactId>marytts-common</artifactId>
 			<version>5.2-beta2</version>
+		</dependency>
+		<dependency>
+			<groupId>de.dfki.mary</groupId>
+			<artifactId>voice-dfki-obadiah-hsmm</artifactId>
+			<version>5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>de.dfki.mary</groupId>
+			<artifactId>voice-dfki-spike-hsmm</artifactId>
+			<version>5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>de.dfki.mary</groupId>
+			<artifactId>voice-cmu-slt-hsmm</artifactId>
+			<version>5.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>de.dfki.mary</groupId>
+			<artifactId>voice-dfki-prudence-hsmm</artifactId>
+			<version>5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>de.dfki.mary</groupId>
+			<artifactId>voice-cmu-bdl-hsmm</artifactId>
+			<version>5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>de.dfki.mary</groupId>
+			<artifactId>voice-dfki-poppy-hsmm</artifactId>
+			<version>5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>de.dfki.mary</groupId>
+			<artifactId>voice-cmu-rms-hsmm</artifactId>
+			<version>5.1</version>
 		</dependency>
 	</dependencies>
 
