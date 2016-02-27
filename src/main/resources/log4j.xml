@@ -21,7 +21,6 @@
 
 	<logger additivity="false" name="org.typetalk">
 		<level value="DEBUG" />
-		<appender-ref ref="console" />
 		<appender-ref ref="file" />
 	</logger>
 
