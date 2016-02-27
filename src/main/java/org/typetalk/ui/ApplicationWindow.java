@@ -91,7 +91,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
 
    private static final Messages MESSAGES = Messages.getInstance();
    private static final UIProperties PROPERTIES = UIProperties.getInstance();
-   private static final Dimension COLLAPSED = new Dimension(600, 120);
+   private static final Dimension COLLAPSED = new Dimension(600, 107);
    private static final Dimension EXPANDED = new Dimension(600, 400);
 
    private Speeker speeker;
@@ -186,7 +186,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       contentPanel.setLayout(new FormLayout(
             new ColumnSpec[] { ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
                   ColumnSpec.decode("50px") },
-            new RowSpec[] { RowSpec.decode("fill:default:grow"), FormFactory.RELATED_GAP_ROWSPEC,
+            new RowSpec[] { RowSpec.decode("fill:default:grow(25)"), RowSpec.decode("min(5dlu;min):grow"),
                   FormFactory.DEFAULT_ROWSPEC }));
       initSpeakingArea(contentPanel);
       initTypingField(contentPanel);
