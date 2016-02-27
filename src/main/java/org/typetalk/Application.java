@@ -28,7 +28,7 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.typetalk.speech.Speeker;
-import org.typetalk.ui.ClientWindow;
+import org.typetalk.ui.ApplicationWindow;
 import org.typetalk.ui.WelcomeScreen;
 
 import lombok.AllArgsConstructor;
@@ -56,7 +56,7 @@ public class Application {
       try {
          Speeker speeker = new Speeker();
          Runtime.getRuntime().addShutdownHook(new ShutdownHook(speeker));
-         ClientWindow clientWindow = new ClientWindow(speeker);
+         ApplicationWindow applicationWindow = new ApplicationWindow(speeker);
          splashScreen.setVisible(false);
          splashScreen.dispose();
          if (PROPERTIES.isWelcomeScreenEnabled()) {
@@ -64,9 +64,9 @@ public class Application {
             ScreenPositioner.centerOnScreen(welcomeScreen);
             welcomeScreen.setVisible(true);
          }
-         clientWindow.setVisible(true);
+         applicationWindow.setVisible(true);
          if (PROPERTIES.isStartMinimized()) {
-            clientWindow.setExtendedState(Frame.ICONIFIED);
+            applicationWindow.setExtendedState(Frame.ICONIFIED);
          }
       } catch (MaryConfigurationException e) {
          log.error("Unable to start Speeker", e);

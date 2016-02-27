@@ -75,6 +75,11 @@ import org.typetalk.UIProperties;
 import org.typetalk.speech.Speeker;
 import org.typetalk.speech.Speeker.EndOfSpeechListener;
 
+import com.jgoodies.forms.factories.FormFactory;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.RowSpec;
+
 import lombok.extern.slf4j.Slf4j;
 import marytts.exceptions.MaryConfigurationException;
 import raging.goblin.swingutils.HelpBrowser;
@@ -82,14 +87,18 @@ import raging.goblin.swingutils.Icon;
 import raging.goblin.swingutils.ScreenPositioner;
 
 @Slf4j
-public class ClientWindow extends JFrame implements EndOfSpeechListener {
+public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
 
    private static final Messages MESSAGES = Messages.getInstance();
    private static final UIProperties PROPERTIES = UIProperties.getInstance();
+   private static final Dimension COLLAPSED = new Dimension(600, 120);
+   private static final Dimension EXPANDED = new Dimension(600, 400);
 
    private Speeker speeker;
 
+   private JPanel contentPanel;
    private JTextField typingField;
+   JScrollPane speakingPane;
    private JTextArea speakingArea;
    private JButton saveButton;
    private JButton playButton;
@@ -97,11 +106,20 @@ public class ClientWindow extends JFrame implements EndOfSpeechListener {
    private JButton stopButton;
    private JMenuItem stopMenuItem;
    private JPanel parseTextButtonPanel;
+   private JButton collapseButton;
 
    private boolean shiftPressed = false;
    private boolean ctrlPressed = false;
 
-   private ActionListener playListener = a -> {
+   private ActionListener collapseExpandListener = al -> {
+      if (PROPERTIES.isScreenCollapsed()) {
+         expand();
+      } else {
+         collapse();
+      }
+   };
+
+   private ActionListener playListener = al -> {
       setParsing(true);
       List<String> speeches = Arrays.asList(speakingArea.getText().trim().split("\n"));
       if (speeches.size() < 1) {
@@ -112,16 +130,16 @@ public class ClientWindow extends JFrame implements EndOfSpeechListener {
       }
    };
 
-   private ActionListener stopListener = a -> {
+   private ActionListener stopListener = al -> {
       speeker.stopSpeeking();
       setParsing(false);
    };
 
-   private ActionListener saveListener = a -> {
+   private ActionListener saveListener = al -> {
       JFileChooser chooser = new JFileChooser();
       chooser.setDialogTitle(MESSAGES.get("save_to_wav"));
       chooser.setFileFilter(new WaveFilter());
-      int returnValue = chooser.showOpenDialog(ClientWindow.this);
+      int returnValue = chooser.showOpenDialog(ApplicationWindow.this);
       if (returnValue == JFileChooser.APPROVE_OPTION) {
          File file = chooser.getSelectedFile();
          if (!file.getName().endsWith("wav") || !file.getName().endsWith("WAV")) {
@@ -131,7 +149,7 @@ public class ClientWindow extends JFrame implements EndOfSpeechListener {
       }
    };
 
-   public ClientWindow(Speeker speeker) throws MaryConfigurationException {
+   public ApplicationWindow(Speeker speeker) throws MaryConfigurationException {
       super(MESSAGES.get("client_window_title"));
       this.speeker = speeker;
       speeker.addEndOfSpeechListener(this);
@@ -157,18 +175,40 @@ public class ClientWindow extends JFrame implements EndOfSpeechListener {
    }
 
    private void initGui() {
-      setSize(600, 400);
+      setSize(EXPANDED);
       setIconImage(Icon.getIcon("/icons/sound.png").getImage());
       ScreenPositioner.centerOnScreen(this);
       BorderLayout layout = new BorderLayout(10, 10);
       getContentPane().setLayout(layout);
       Border padding = BorderFactory.createEmptyBorder(10, 10, 10, 10);
       ((JComponent) getContentPane()).setBorder(padding);
+      contentPanel = new JPanel();
+      contentPanel.setLayout(new FormLayout(
+            new ColumnSpec[] { ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
+                  ColumnSpec.decode("50px") },
+            new RowSpec[] { RowSpec.decode("fill:default:grow"), FormFactory.RELATED_GAP_ROWSPEC,
+                  FormFactory.DEFAULT_ROWSPEC }));
+      initSpeakingArea(contentPanel);
+      initTypingField(contentPanel);
+      initRightButtonPanel(contentPanel);
+      initCollapseExpandButton(contentPanel);
+      getContentPane().add(contentPanel);
 
+      if (PROPERTIES.isScreenCollapsed()) {
+         collapse();
+      } else {
+         expand();
+      }
+
+      addGlobalKeyAdapters(typingField, speakingArea, saveButton, playButton, collapseButton);
+      setJMenuBar(createMenu());
+   }
+
+   private void initSpeakingArea(JPanel contentPanel) {
       speakingArea = new JTextArea();
       speakingArea.setWrapStyleWord(true);
       speakingArea.setLineWrap(true);
-      JScrollPane speakingPane = new JScrollPane(speakingArea);
+      speakingPane = new JScrollPane(speakingArea);
       speakingPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
       speakingArea.addKeyListener(new KeyAdapter() {
 
@@ -184,11 +224,34 @@ public class ClientWindow extends JFrame implements EndOfSpeechListener {
             }
          }
       });
-      getContentPane().add(speakingPane, BorderLayout.CENTER);
       new EditAdapter(speakingArea);
+   }
 
+   private void initRightButtonPanel(JPanel contentPanel) {
+      GridLayout buttonLayout = new GridLayout(2, 0);
+      buttonLayout.setVgap(20);
+      parseTextButtonPanel = new JPanel(buttonLayout);
+      parseTextButtonPanel.setPreferredSize(new Dimension(50, 50));
+
+      saveButton = new JButton(Icon.getIcon("/icons/save.png"));
+      saveButton.setToolTipText(MESSAGES.get("save_tooltip"));
+      saveButton.addActionListener(saveListener);
+      parseTextButtonPanel.add(saveButton);
+
+      playButton = new JButton(Icon.getIcon("/icons/control_play.png"));
+      playButton.setToolTipText(MESSAGES.get("play_tooltip"));
+      playButton.addActionListener(playListener);
+      parseTextButtonPanel.add(playButton);
+
+      stopButton = new JButton(Icon.getIcon("/icons/control_stop.png"));
+      stopButton.setToolTipText(MESSAGES.get("stop_tooltip"));
+      stopButton.addActionListener(stopListener);
+      stopButton.setVisible(false);
+   }
+
+   private void initTypingField(JPanel contentPanel) {
       typingField = new JTextField();
-      getContentPane().add(typingField, BorderLayout.SOUTH);
+      contentPanel.add(typingField, "1, 3");
       typingField.addKeyListener(new KeyAdapter() {
 
          @Override
@@ -203,30 +266,40 @@ public class ClientWindow extends JFrame implements EndOfSpeechListener {
          }
       });
       new EditAdapter(typingField);
+   }
 
-      GridLayout buttonLayout = new GridLayout(2, 0);
-      buttonLayout.setVgap(20);
-      parseTextButtonPanel = new JPanel(buttonLayout);
-      parseTextButtonPanel.setPreferredSize(new Dimension(50, 50));
-      getContentPane().add(parseTextButtonPanel, BorderLayout.EAST);
+   private void initCollapseExpandButton(JPanel contentPanel) {
+      collapseButton = new JButton(Icon.getIcon("/icons/application_top_contract.png"));
+      collapseButton.addActionListener(collapseExpandListener);
+      contentPanel.add(collapseButton, "3, 3");
+   }
 
-      saveButton = new JButton(Icon.getIcon("/icons/save.png"));
-      saveButton.setToolTipText(MESSAGES.get("save_tooltip"));
-      saveButton.addActionListener(saveListener);
-      parseTextButtonPanel.add(saveButton, BorderLayout.EAST);
+   private void collapse() {
+      collapseButton.setIcon(Icon.getIcon("/icons/application_top_expand.png"));
+      collapseButton.setToolTipText(MESSAGES.get("expand_tooltip"));
+      contentPanel.remove(parseTextButtonPanel);
+      contentPanel.remove(speakingPane);
+      setSize(COLLAPSED);
+      PROPERTIES.setScreenCollapsed(true);
+      typingField.grabFocus();
+   }
 
-      playButton = new JButton(Icon.getIcon("/icons/control_play.png"));
-      playButton.setToolTipText(MESSAGES.get("play_tooltip"));
-      playButton.addActionListener(playListener);
-      parseTextButtonPanel.add(playButton, BorderLayout.EAST);
+   private void expand() {
+      collapseButton.setIcon(Icon.getIcon("/icons/application_top_contract.png"));
+      collapseButton.setToolTipText(MESSAGES.get("collapse_tooltip"));
+      addParseTextButtonPanel();
+      addSpeakingPane();
+      setSize(EXPANDED);
+      PROPERTIES.setScreenCollapsed(false);
+      typingField.grabFocus();
+   }
 
-      stopButton = new JButton(Icon.getIcon("/icons/control_stop.png"));
-      stopButton.setToolTipText(MESSAGES.get("stop_tooltip"));
-      stopButton.addActionListener(stopListener);
+   private void addParseTextButtonPanel() {
+      contentPanel.add(parseTextButtonPanel, "3, 1");
+   }
 
-      addGlobalKeyAdapters(typingField, speakingArea, saveButton, playButton);
-
-      setJMenuBar(createMenu());
+   private void addSpeakingPane() {
+      contentPanel.add(speakingPane, "1, 1");
    }
 
    private JMenuBar createMenu() {
@@ -242,15 +315,15 @@ public class ClientWindow extends JFrame implements EndOfSpeechListener {
          JFileChooser chooser = new JFileChooser();
          chooser.setDialogTitle(MESSAGES.get("open_file"));
          chooser.setFileFilter(new TxtFilter());
-         int returnValue = chooser.showOpenDialog(ClientWindow.this);
+         int returnValue = chooser.showOpenDialog(ApplicationWindow.this);
          if (returnValue == JFileChooser.APPROVE_OPTION) {
             File file = chooser.getSelectedFile();
             try {
                List<String> allLines = Files.readAllLines(file.toPath());
                speakingArea.setText(allLines.stream().collect(Collectors.joining("\n")));
             } catch (Exception e) {
-               JOptionPane.showMessageDialog(ClientWindow.this, MESSAGES.get("open_file_error"), MESSAGES.get("error"),
-                     JOptionPane.ERROR_MESSAGE);
+               JOptionPane.showMessageDialog(ApplicationWindow.this, MESSAGES.get("open_file_error"),
+                     MESSAGES.get("error"), JOptionPane.ERROR_MESSAGE);
                log.error("Unable to open text file", e);
             }
          }
@@ -263,7 +336,7 @@ public class ClientWindow extends JFrame implements EndOfSpeechListener {
          JFileChooser chooser = new JFileChooser();
          chooser.setDialogTitle(MESSAGES.get("save_file"));
          chooser.setFileFilter(new TxtFilter());
-         int returnValue = chooser.showOpenDialog(ClientWindow.this);
+         int returnValue = chooser.showOpenDialog(ApplicationWindow.this);
          if (returnValue == JFileChooser.APPROVE_OPTION) {
             File file = chooser.getSelectedFile();
             if (!file.getName().endsWith("txt") || !file.getName().endsWith("TXT")) {
@@ -272,8 +345,8 @@ public class ClientWindow extends JFrame implements EndOfSpeechListener {
             try {
                Files.write(file.toPath(), speakingArea.getText().getBytes());
             } catch (Exception e) {
-               JOptionPane.showMessageDialog(ClientWindow.this, MESSAGES.get("save_file_error"), MESSAGES.get("error"),
-                     JOptionPane.ERROR_MESSAGE);
+               JOptionPane.showMessageDialog(ApplicationWindow.this, MESSAGES.get("save_file_error"),
+                     MESSAGES.get("error"), JOptionPane.ERROR_MESSAGE);
                log.error("Unable to save text file", e);
             }
          }
@@ -304,13 +377,13 @@ public class ClientWindow extends JFrame implements EndOfSpeechListener {
             Icon.getIcon("/icons/comment_edit.png"));
       configureVoiceItem.setMnemonic(KeyEvent.VK_V);
       configureVoiceItem.addActionListener(a -> {
-         VoiceConfigurationDialog dialog = new VoiceConfigurationDialog(ClientWindow.this);
+         VoiceConfigurationDialog dialog = new VoiceConfigurationDialog(ApplicationWindow.this);
          dialog.setVisible(true);
          if (dialog.isOkPressed()) {
             try {
                speeker.initMaryTTS();
             } catch (Exception e) {
-               JOptionPane.showMessageDialog(ClientWindow.this, MESSAGES.get("init_marytts_error"),
+               JOptionPane.showMessageDialog(ApplicationWindow.this, MESSAGES.get("init_marytts_error"),
                      MESSAGES.get("error"), JOptionPane.ERROR_MESSAGE);
                log.error("Unable to reinitialize marytts", e);
             }
@@ -322,10 +395,10 @@ public class ClientWindow extends JFrame implements EndOfSpeechListener {
             Icon.getIcon("/icons/application_form_edit.png"));
       configureGuiItem.setMnemonic(KeyEvent.VK_G);
       configureGuiItem.addActionListener(a -> {
-         GuiConfigDialog dialog = new GuiConfigDialog(ClientWindow.this);
+         GuiConfigDialog dialog = new GuiConfigDialog(ApplicationWindow.this);
          dialog.setVisible(true);
          if (dialog.isOkPressed() && dialog.isSettingsChanged()) {
-            JOptionPane.showMessageDialog(ClientWindow.this, MESSAGES.get("restart_message"),
+            JOptionPane.showMessageDialog(ApplicationWindow.this, MESSAGES.get("restart_message"),
                   MESSAGES.get("restart_title"), JOptionPane.INFORMATION_MESSAGE);
          }
       });
@@ -359,7 +432,7 @@ public class ClientWindow extends JFrame implements EndOfSpeechListener {
 
       JMenuItem aboutItem = new JMenuItem(MESSAGES.get("about"), Icon.getIcon("/icons/star.png"));
       aboutItem.setMnemonic(KeyEvent.VK_A);
-      aboutItem.addActionListener(a -> new AboutDialog(ClientWindow.this).setVisible(true));
+      aboutItem.addActionListener(a -> new AboutDialog(ApplicationWindow.this).setVisible(true));
       helpMenu.add(aboutItem);
 
       return menuBar;
@@ -470,6 +543,8 @@ public class ClientWindow extends JFrame implements EndOfSpeechListener {
             playListener.actionPerformed(null);
          } else if (ctrlPressed && e.getKeyCode() == KeyEvent.VK_S) {
             saveListener.actionPerformed(null);
+         } else if (ctrlPressed && e.getKeyCode() == KeyEvent.VK_F) {
+            collapseExpandListener.actionPerformed(null);
          }
       }
    }
