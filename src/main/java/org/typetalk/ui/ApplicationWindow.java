@@ -543,7 +543,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
             playListener.actionPerformed(null);
          } else if (ctrlPressed && e.getKeyCode() == KeyEvent.VK_S) {
             saveListener.actionPerformed(null);
-         } else if (ctrlPressed && e.getKeyCode() == KeyEvent.VK_F) {
+         } else if (ctrlPressed && e.getKeyCode() == KeyEvent.VK_E) {
             collapseExpandListener.actionPerformed(null);
          }
       }
