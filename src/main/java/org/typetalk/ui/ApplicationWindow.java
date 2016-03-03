@@ -71,7 +71,7 @@ import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
 import org.typetalk.Messages;
-import org.typetalk.UIProperties;
+import org.typetalk.TypeTalkProperties;
 import org.typetalk.data.Suggestions;
 import org.typetalk.speech.Speeker;
 import org.typetalk.speech.Speeker.EndOfSpeechListener;
@@ -91,7 +91,7 @@ import raging.goblin.swingutils.ScreenPositioner;
 public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
 
    private static final Messages MESSAGES = Messages.getInstance();
-   private static final UIProperties PROPERTIES = UIProperties.getInstance();
+   private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
    private static final Dimension COLLAPSED = new Dimension(600, 107);
    private static final Dimension EXPANDED = new Dimension(600, 400);
 

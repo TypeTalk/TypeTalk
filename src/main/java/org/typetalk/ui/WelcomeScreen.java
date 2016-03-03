@@ -33,14 +33,14 @@ import javax.swing.SwingConstants;
 
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.typetalk.Messages;
-import org.typetalk.UIProperties;
+import org.typetalk.TypeTalkProperties;
 
 import raging.goblin.swingutils.Icon;
 
 public class WelcomeScreen extends JFrame {
 
    private static final Messages MESSAGES = Messages.getInstance();
-   private static final UIProperties PROPERTIES = UIProperties.getInstance();
+   private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
    private int[] nativeHookKeyCodes = PROPERTIES.getNativeHookKeyCodes();
 
    public WelcomeScreen() {

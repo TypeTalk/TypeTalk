@@ -36,7 +36,7 @@ import javax.swing.border.EmptyBorder;
 
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.typetalk.Messages;
-import org.typetalk.UIProperties;
+import org.typetalk.TypeTalkProperties;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -52,7 +52,7 @@ import raging.goblin.swingutils.StringSeparator;
 public class GuiConfigDialog extends JDialog {
 
    private static final Messages MESSAGES = Messages.getInstance();
-   private static final UIProperties PROPERTIES = UIProperties.getInstance();
+   private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
 
    @Getter
    private boolean okPressed;

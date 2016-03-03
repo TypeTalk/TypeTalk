@@ -25,7 +25,7 @@ import java.util.prefs.Preferences;
 
 import raging.goblin.swingutils.SwingUtils.Properties;
 
-public class UIProperties implements Properties {
+public class TypeTalkProperties implements Properties {
 
    private static final String DEFAULT_NATIVE_HOOK_KEY_CODES = "29,56,57";
    public static final boolean DEFAULT_SPLASH_SCREEN_ENABLED = true;
@@ -47,21 +47,20 @@ public class UIProperties implements Properties {
    private static final String KEY_VOICE = "voice";
    private static final String KEY_DOUBLE_CLICK_DELAY = "doubleclickdelay";
    private static final String KEY_TOAST_TIME = "toasttime";
-   private static final String KEY_LAF = "lookandfeel";
    private static final String KEY_SETTINGS_DIRECTORY = "settingsdirectory";
 
-   private static UIProperties instance;
+   private static TypeTalkProperties instance;
    private boolean nativeHookEnabled = true;
    private int[] nativeHookKeyCodes;
-   private static Preferences userPreferences = Preferences.userNodeForPackage(UIProperties.class);
+   private static Preferences userPreferences = Preferences.userNodeForPackage(TypeTalkProperties.class);
 
-   private UIProperties() {
+   private TypeTalkProperties() {
       // Singleton
    }
 
-   public static UIProperties getInstance() {
+   public static TypeTalkProperties getInstance() {
       if (instance == null) {
-         instance = new UIProperties();
+         instance = new TypeTalkProperties();
       }
       return instance;
    }

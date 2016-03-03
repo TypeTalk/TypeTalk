@@ -37,12 +37,12 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import org.typetalk.UIProperties;
+import org.typetalk.TypeTalkProperties;
 
 public class ToastWindow extends JFrame {
 
    private static final int MARGIN = 25;
-   private static final UIProperties PROPERTIES = UIProperties.getInstance();
+   private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
    private static final String textFormat = "<html>%s</html>";
 
    private JLabel messageLabel;

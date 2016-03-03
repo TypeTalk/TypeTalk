@@ -43,7 +43,7 @@ import raging.goblin.swingutils.SwingUtils;
 @Slf4j
 public class Application {
 
-   private static final UIProperties PROPERTIES = UIProperties.getInstance();
+   private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
    private static final Messages MESSAGES = Messages.getInstance();
 
    public static void main(String[] args) {
@@ -87,10 +87,10 @@ public class Application {
    private static void initDataFolder() {
       try {
          String configuredSettingsDirectory = PROPERTIES.getSettingsDirectory();
-         if (configuredSettingsDirectory.equals(UIProperties.DEFAULT_SETTINGS_DIRECTORY)) {
+         if (configuredSettingsDirectory.equals(TypeTalkProperties.DEFAULT_SETTINGS_DIRECTORY)) {
             Path homeDirectory = Paths.get(System.getProperty("user.home")).normalize().toAbsolutePath();
             configuredSettingsDirectory = homeDirectory.toString() + File.separator
-                  + UIProperties.DEFAULT_SETTINGS_DIRECTORY;
+                  + TypeTalkProperties.DEFAULT_SETTINGS_DIRECTORY;
             PROPERTIES.setSettingsDirectory(configuredSettingsDirectory);
          }
          Path settingsDirectory = Paths.get(PROPERTIES.getSettingsDirectory());

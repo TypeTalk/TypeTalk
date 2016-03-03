@@ -30,7 +30,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.lang.StringUtils;
-import org.typetalk.UIProperties;
+import org.typetalk.TypeTalkProperties;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 public final class Suggestions {
 
    private static final int SIZE_LIMIT = 1000;
-   private static final UIProperties PROPERTIES = UIProperties.getInstance();
+   private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
    private static Suggestions instance;
 
    private Path suggestionsFile;
