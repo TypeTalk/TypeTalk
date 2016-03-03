@@ -23,10 +23,11 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.prefs.Preferences;
 
-public class UIProperties {
+import raging.goblin.swingutils.SwingUtils.Properties;
+
+public class UIProperties implements Properties {
 
    private static final String DEFAULT_NATIVE_HOOK_KEY_CODES = "29,56,57";
-
    public static final boolean DEFAULT_SPLASH_SCREEN_ENABLED = true;
    public static final boolean DEFAULT_WELCOME_SCREEN_ENABLED = true;
    public static final boolean DEFAULT_START_MINIMIZED = false;
@@ -34,7 +35,7 @@ public class UIProperties {
    public static final String DEFAULT_VOICE = "DFKI_OBADIAH";
    public static final int DEFAULT_DOUBLE_CLICK_DELAY = 250;
    public static final int DEFAULT_TOAST_TIME = 3000;
-   public static final String DEFAULT_LAF = "DEFAULT";
+   public static final String DEFAULT_SETTINGS_DIRECTORY = ".typetalk";
 
    private static final String KEY_LANGUAGE = "language";
    private static final String KEY_COUNTRY = "country";
@@ -47,6 +48,7 @@ public class UIProperties {
    private static final String KEY_DOUBLE_CLICK_DELAY = "doubleclickdelay";
    private static final String KEY_TOAST_TIME = "toasttime";
    private static final String KEY_LAF = "lookandfeel";
+   private static final String KEY_SETTINGS_DIRECTORY = "settingsdirectory";
 
    private static UIProperties instance;
    private boolean nativeHookEnabled = true;
@@ -165,11 +167,21 @@ public class UIProperties {
       userPreferences.putInt(KEY_TOAST_TIME, toastTime);
    }
    
+   @Override
    public String getLaf() {
       return userPreferences.get(KEY_LAF, DEFAULT_LAF);
    }
 
+   @Override
    public void setLaf(String laf) {
       userPreferences.put(KEY_LAF, laf);
+   }
+   
+   public String getSettingsDirectory() {
+      return userPreferences.get(KEY_SETTINGS_DIRECTORY, DEFAULT_SETTINGS_DIRECTORY);
+   }
+   
+   public void setSettingsDirectory(String settingsDirectory) {
+      userPreferences.put(KEY_SETTINGS_DIRECTORY, settingsDirectory);
    }
 }

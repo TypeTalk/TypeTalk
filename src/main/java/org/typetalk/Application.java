@@ -20,10 +20,12 @@
 package org.typetalk;
 
 import java.awt.Frame;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
-
-import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
 
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
@@ -36,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import marytts.exceptions.MaryConfigurationException;
 import raging.goblin.swingutils.ScreenPositioner;
 import raging.goblin.swingutils.SplashScreen;
+import raging.goblin.swingutils.SwingUtils;
 
 @Slf4j
 public class Application {
@@ -44,9 +47,10 @@ public class Application {
    private static final Messages MESSAGES = Messages.getInstance();
 
    public static void main(String[] args) {
-      initAntiAliasing();
-      disablePaintSliderValue();
-      loadLaf(args);
+      initDataFolder();
+      SwingUtils.initAntiAliasing();
+      SwingUtils.disablePaintSliderValue();
+      SwingUtils.loadLaf(args, PROPERTIES);
       setLocale();
 
       SplashScreen splashScreen = new SplashScreen("TypeTalk", "/icons/sound.png");
@@ -80,64 +84,32 @@ public class Application {
       }
    }
 
+   private static void initDataFolder() {
+      try {
+         String configuredSettingsDirectory = PROPERTIES.getSettingsDirectory();
+         if (configuredSettingsDirectory.equals(UIProperties.DEFAULT_SETTINGS_DIRECTORY)) {
+            Path homeDirectory = Paths.get(System.getProperty("user.home")).normalize().toAbsolutePath();
+            configuredSettingsDirectory = homeDirectory.toString() + File.separator
+                  + UIProperties.DEFAULT_SETTINGS_DIRECTORY;
+            PROPERTIES.setSettingsDirectory(configuredSettingsDirectory);
+         }
+         Path settingsDirectory = Paths.get(PROPERTIES.getSettingsDirectory());
+         if (!Files.exists(settingsDirectory)) {
+            Files.createDirectories(settingsDirectory);
+         } else if (!settingsDirectory.toFile().isDirectory()) {
+            PROPERTIES.setSettingsDirectory(PROPERTIES.getSettingsDirectory() + "_dir");
+            Files.createDirectories(Paths.get(PROPERTIES.getSettingsDirectory()));
+         }
+      } catch (IOException e) {
+         log.error("Unable to initialize settings directory");
+      }
+   }
+
    private static void setLocale() {
       String language = PROPERTIES.getLocaleLanguage();
       String country = PROPERTIES.getLocaleCountry();
       log.debug(String.format("Setting locale to: %s/%s", language, country));
       Locale.setDefault(new Locale(language, country));
-   }
-   
-   private static void initAntiAliasing() {
-      System.setProperty("awt.useSystemAAFontSettings", "lcd");
-      System.setProperty("swing.aatext", "true");
-   }
-
-   private static void loadLaf(String[] args) {
-      try {
-         if (args.length >= 1) {
-            log.debug("Setting look and feel manually to " + args[0]);
-            switch (args[0].toLowerCase()) {
-            case "metal":
-               UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-               return;
-            case "nimbus":
-               UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-               return;
-            case "motif":
-               UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
-               return;
-            case "gtk":
-               UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
-               return;
-            }
-         }
-
-         if (PROPERTIES.getLaf().equals(UIProperties.DEFAULT_LAF)) {
-            if (UIManager.getSystemLookAndFeelClassName().contains("Metal")) {
-               PROPERTIES.setLaf("Nimbus");
-            } else {
-               for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                  if (info.getClassName().equals(UIManager.getSystemLookAndFeelClassName())) {
-                     PROPERTIES.setLaf(info.getName());
-                  }
-               }
-            }
-         }
-         
-         for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-            if(info.getName().equals(PROPERTIES.getLaf())) {
-               UIManager.setLookAndFeel(info.getClassName());
-               log.debug("Setting system look and feel: " + info.getClassName());
-            }
-         }
-      } catch (Exception e) {
-         log.error("Could not set look and feel");
-         log.debug(e.getMessage(), e);
-      }
-   }
-
-   private static void disablePaintSliderValue() {
-      UIManager.put("Slider.paintValue", false);      
    }
 
    @AllArgsConstructor

@@ -72,6 +72,7 @@ import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
 import org.typetalk.Messages;
 import org.typetalk.UIProperties;
+import org.typetalk.data.Suggestions;
 import org.typetalk.speech.Speeker;
 import org.typetalk.speech.Speeker.EndOfSpeechListener;
 
@@ -255,11 +256,12 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       typingField.addKeyListener(new KeyAdapter() {
 
          @Override
-         public void keyPressed(KeyEvent e) {
+         public void keyReleased(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                speeker.speek(Arrays.asList(typingField.getText()));
                speakingArea.setText(speakingArea.getText() + "\n" + typingField.getText());
                speakingArea.setCaretPosition(speakingArea.getText().length());
+               Suggestions.getInstance().addSuggestion(typingField.getText());
                typingField.setText("");
                typingField.requestFocusInWindow();
             }
