@@ -27,26 +27,35 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
 
+import javax.swing.JOptionPane;
+
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.typetalk.speech.Speeker;
 import org.typetalk.ui.ApplicationWindow;
 import org.typetalk.ui.WelcomeScreen;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import marytts.exceptions.MaryConfigurationException;
+import raging.goblin.swingutils.ApplicationInstanceManager;
 import raging.goblin.swingutils.ScreenPositioner;
 import raging.goblin.swingutils.SplashScreen;
 import raging.goblin.swingutils.SwingUtils;
 
 @Slf4j
-public class Application {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class Application {
 
    private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
    private static final Messages MESSAGES = Messages.getInstance();
+   
+   private static ApplicationWindow applicationWindow;
 
    public static void main(String[] args) {
+      checkSingleInstance();
       initDataFolder();
       SwingUtils.initAntiAliasing();
       SwingUtils.disablePaintSliderValue();
@@ -60,7 +69,7 @@ public class Application {
       try {
          Speeker speeker = new Speeker();
          Runtime.getRuntime().addShutdownHook(new ShutdownHook(speeker));
-         ApplicationWindow applicationWindow = new ApplicationWindow(speeker);
+         applicationWindow = new ApplicationWindow(speeker);
          splashScreen.setVisible(false);
          splashScreen.dispose();
          if (PROPERTIES.isWelcomeScreenEnabled()) {
@@ -82,6 +91,18 @@ public class Application {
          }
          System.exit(0);
       }
+   }
+
+   private static void checkSingleInstance() {
+      if (!ApplicationInstanceManager.registerInstance()) {
+         log.warn("Another instance of this application is already running.");
+         System.exit(0);
+      }
+      ApplicationInstanceManager.setSubListener(() -> {
+         log.warn("The user ried to start the application twice");
+         JOptionPane.showMessageDialog(applicationWindow, MESSAGES.get("single_instance"),
+               MESSAGES.get("error"), JOptionPane.ERROR_MESSAGE);
+      });
    }
 
    private static void initDataFolder() {
