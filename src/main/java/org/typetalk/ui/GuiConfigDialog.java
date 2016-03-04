@@ -101,8 +101,8 @@ public class GuiConfigDialog extends JDialog {
       configPanel.add(lafSeparator, "1, 7, 5, 1");
 
       LookAndFeel[] allLafs = LookAndFeel.getAll();
-//      lafComboBox = new JComboBox<LookAndFeel>(allLafs);
-       lafComboBox = new JComboBox<LookAndFeel>();
+      lafComboBox = new JComboBox<LookAndFeel>(allLafs);
+//       lafComboBox = new JComboBox<LookAndFeel>();
       LookAndFeel selectedLaf = Arrays.stream(allLafs).filter(l -> l.getName().equals(PROPERTIES.getLaf())).findFirst()
             .get();
       lafComboBox.setSelectedItem(selectedLaf);
