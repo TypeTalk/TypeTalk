@@ -99,7 +99,7 @@ public final class Application {
          System.exit(0);
       }
       ApplicationInstanceManager.setSubListener(() -> {
-         log.warn("The user ried to start the application twice");
+         log.warn("The user tried to start the application twice");
          JOptionPane.showMessageDialog(applicationWindow, MESSAGES.get("single_instance"),
                MESSAGES.get("error"), JOptionPane.ERROR_MESSAGE);
       });

@@ -30,8 +30,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 
 import org.jnativehook.keyboard.NativeKeyEvent;
@@ -102,7 +100,6 @@ public class GuiConfigDialog extends JDialog {
 
       LookAndFeel[] allLafs = LookAndFeel.getAll();
       lafComboBox = new JComboBox<LookAndFeel>(allLafs);
-//       lafComboBox = new JComboBox<LookAndFeel>();
       LookAndFeel selectedLaf = Arrays.stream(allLafs).filter(l -> l.getName().equals(PROPERTIES.getLaf())).findFirst()
             .get();
       lafComboBox.setSelectedItem(selectedLaf);
@@ -202,12 +199,5 @@ public class GuiConfigDialog extends JDialog {
    private String getNativeHookText(int[] nativeHookKeyCodes) {
       return Arrays.stream(nativeHookKeyCodes).mapToObj(kc -> NativeKeyEvent.getKeyText(kc))
             .collect(Collectors.joining(", "));
-   }
-
-   public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-         UnsupportedLookAndFeelException {
-      UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
-      UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-      new GuiConfigDialog(null).setVisible(true);
    }
 }
