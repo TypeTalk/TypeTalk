@@ -19,7 +19,6 @@
 
 package org.typetalk.ui;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -92,14 +91,15 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
 
    private static final Messages MESSAGES = Messages.getInstance();
    private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
-   private static final Dimension COLLAPSED = new Dimension(600, 107);
+
    private static final Dimension EXPANDED = new Dimension(600, 400);
+   private Dimension collapsed;
 
    private Speeker speeker;
 
    private JPanel contentPanel;
    private JTextField typingField;
-   JScrollPane speakingPane;
+   private JScrollPane speakingPane;
    private JTextArea speakingArea;
    private JButton saveButton;
    private JButton playButton;
@@ -176,11 +176,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    }
 
    private void initGui() {
-      setSize(EXPANDED);
       setIconImage(Icon.getIcon("/icons/sound.png").getImage());
-      ScreenPositioner.centerOnScreen(this);
-      BorderLayout layout = new BorderLayout(10, 10);
-      getContentPane().setLayout(layout);
       Border padding = BorderFactory.createEmptyBorder(10, 10, 10, 10);
       ((JComponent) getContentPane()).setBorder(padding);
       contentPanel = new JPanel();
@@ -195,14 +191,22 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       initCollapseExpandButton(contentPanel);
       getContentPane().add(contentPanel);
 
+      contentPanel.add(typingField, "1, 3");
+      contentPanel.add(collapseButton, "3, 3");
+      addExpandedElements();
+      setJMenuBar(createMenu());
+      setPreferredSize(EXPANDED);
+      pack();
+      collapsed = new Dimension((int) EXPANDED.getWidth(), getHeight() - speakingPane.getHeight());
+      removeExpandedElements();
       if (PROPERTIES.isScreenCollapsed()) {
          collapse();
       } else {
          expand();
       }
 
+      ScreenPositioner.centerOnScreen(this);
       addGlobalKeyAdapters(typingField, speakingArea, saveButton, playButton, collapseButton);
-      setJMenuBar(createMenu());
    }
 
    private void initSpeakingArea(JPanel contentPanel) {
@@ -252,7 +256,6 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
 
    private void initTypingField(JPanel contentPanel) {
       typingField = new JTextField();
-      contentPanel.add(typingField, "1, 3");
       typingField.addKeyListener(new KeyAdapter() {
 
          @Override
@@ -273,15 +276,13 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    private void initCollapseExpandButton(JPanel contentPanel) {
       collapseButton = new JButton(Icon.getIcon("/icons/application_top_contract.png"));
       collapseButton.addActionListener(collapseExpandListener);
-      contentPanel.add(collapseButton, "3, 3");
    }
 
    private void collapse() {
       collapseButton.setIcon(Icon.getIcon("/icons/application_top_expand.png"));
       collapseButton.setToolTipText(MESSAGES.get("expand_tooltip"));
-      contentPanel.remove(parseTextButtonPanel);
-      contentPanel.remove(speakingPane);
-      setSize(COLLAPSED);
+      removeExpandedElements();
+      setSize(collapsed);
       PROPERTIES.setScreenCollapsed(true);
       typingField.grabFocus();
    }
@@ -289,19 +290,20 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    private void expand() {
       collapseButton.setIcon(Icon.getIcon("/icons/application_top_contract.png"));
       collapseButton.setToolTipText(MESSAGES.get("collapse_tooltip"));
-      addParseTextButtonPanel();
-      addSpeakingPane();
+      addExpandedElements();
       setSize(EXPANDED);
       PROPERTIES.setScreenCollapsed(false);
       typingField.grabFocus();
    }
 
-   private void addParseTextButtonPanel() {
+   private void addExpandedElements() {
       contentPanel.add(parseTextButtonPanel, "3, 1");
+      contentPanel.add(speakingPane, "1, 1");
    }
 
-   private void addSpeakingPane() {
-      contentPanel.add(speakingPane, "1, 1");
+   private void removeExpandedElements() {
+      contentPanel.remove(parseTextButtonPanel);
+      contentPanel.remove(speakingPane);
    }
 
    private JMenuBar createMenu() {
