@@ -18,6 +18,7 @@
 				<thead>
 					<tr>
 						<th>Version</th>
+						<th>Date</th>
 						<th>Jar</th>
 						<th>Rpm</th>
 						<th>Deb</th>
@@ -37,6 +38,8 @@
 			for(var i=0; i<data.length; i++) {
 				sorted_data[i] = [];
 				sorted_data[i]['tag_name'] = data[i]['tag_name'];
+				sorted_data[i]['created_at'] = data[i]['created_at'];
+				
 				for(var j=0; j<data[i]['assets'].length; j++) {
 					if(data[i]['assets'][j]['name'].indexOf('jar') > -1) {
 						sorted_data[i]['jar'] = data[i]['assets'][j]['download_count']; 
@@ -63,7 +66,7 @@
 					sorted_data[k]['deb'] = '-';
 				}
 				
-				$('#table_body').append('<tr><td>' + sorted_data[k]['tag_name'] + '</td><td>' + sorted_data[k]['jar'] + '</td><td>' + sorted_data[k]['rpm'] + '</td><td>' + sorted_data[k]['deb'] + '</td><td>' + sorted_data[k]['total'] + '</td><</tr>');
+				$('#table_body').append('<tr><td>' + sorted_data[k]['tag_name'] + '</td><td>' + sorted_data[k]['created_at'] + '</td><td>' + sorted_data[k]['jar'] + '</td><td>' + sorted_data[k]['rpm'] + '</td><td>' + sorted_data[k]['deb'] + '</td><td>' + sorted_data[k]['total'] + '</td><</tr>');
 			}
 		});
 	</script>
