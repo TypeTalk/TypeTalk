@@ -1,0 +1,71 @@
+<html>
+
+<head>
+	<title>Typetalk statistics</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+	<script src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+</head>
+
+<body>
+	<p>
+		<div class="container">
+			<table class="table table-striped table-bordered">
+				<thead>
+					<tr>
+						<th>Version</th>
+						<th>Jar</th>
+						<th>Rpm</th>
+						<th>Deb</th>
+						<th>Total</th>
+					</tr>
+				</thead>
+				<tbody id="table_body">
+				</tbody>
+			</table>
+		</div>
+	</p>
+
+	<script type="text/javascript">
+		$.get("https://api.github.com/repos/typetalk/typetalk/releases", function(data) {
+			var sorted_data = [];
+			
+			for(var i=0; i<data.length; i++) {
+				sorted_data[i] = [];
+				sorted_data[i]['tag_name'] = data[i]['tag_name'];
+				for(var j=0; j<data[i]['assets'].length; j++) {
+					if(data[i]['assets'][j]['name'].indexOf('jar') > -1) {
+						sorted_data[i]['jar'] = data[i]['assets'][j]['download_count']; 
+					}
+					if(data[i]['assets'][j]['name'].indexOf('rpm') > -1) {
+						sorted_data[i]['rpm'] = data[i]['assets'][j]['download_count']; 
+					}
+					if(data[i]['assets'][j]['name'].indexOf('deb') > -1) {
+						sorted_data[i]['deb'] = data[i]['assets'][j]['download_count']; 
+					}
+				}
+			}
+			
+			for(var k=0; k<sorted_data.length; k++) {
+				
+				sorted_data[k]['total'] = sorted_data[k]['jar'];
+				sorted_data[k]['total'] += sorted_data[k]['rpm'] ? sorted_data[k]['rpm'] : 0; 
+				sorted_data[k]['total'] += sorted_data[k]['deb'] ? sorted_data[k]['deb'] : 0; 
+
+				if(!sorted_data[k]['rpm']) {
+					sorted_data[k]['rpm'] = '-';
+				}
+				if(!sorted_data[k]['deb']) {
+					sorted_data[k]['deb'] = '-';
+				}
+				
+				$('#table_body').append('<tr><td>' + sorted_data[k]['tag_name'] + '</td><td>' + sorted_data[k]['jar'] + '</td><td>' + sorted_data[k]['rpm'] + '</td><td>' + sorted_data[k]['deb'] + '</td><td>' + sorted_data[k]['total'] + '</td><</tr>');
+			}
+		});
+	</script>
+</body>
+</html>
