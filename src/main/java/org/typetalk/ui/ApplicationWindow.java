@@ -93,11 +93,12 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
 
    private static final Dimension EXPANDED = new Dimension(600, 400);
-   private Dimension collapsed;
+   private static final Dimension COLLAPSED = new Dimension(600, 75);
 
    private Speeker speeker;
 
-   private JPanel contentPanel;
+   private JPanel expandedPanel;
+   private JPanel collapsedPanel;
    private JTextField typingField;
    private JScrollPane speakingPane;
    private JTextArea speakingArea;
@@ -177,28 +178,30 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
 
    private void initGui() {
       setIconImage(Icon.getIcon("/icons/sound.png").getImage());
+      setJMenuBar(createMenu());
       Border padding = BorderFactory.createEmptyBorder(10, 10, 10, 10);
       ((JComponent) getContentPane()).setBorder(padding);
-      contentPanel = new JPanel();
-      contentPanel.setLayout(new FormLayout(
+
+      initSpeakingArea();
+      initTypingField();
+      initRightButtonPanel();
+      initCollapseExpandButton();
+
+      expandedPanel = new JPanel();
+      expandedPanel.setLayout(new FormLayout(
             new ColumnSpec[] { ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
                   ColumnSpec.decode("50px") },
-            new RowSpec[] { RowSpec.decode("fill:default:grow(25)"), RowSpec.decode("min(5dlu;min):grow"),
+            new RowSpec[] { RowSpec.decode("fill:default:grow"), FormFactory.RELATED_GAP_ROWSPEC,
                   FormFactory.DEFAULT_ROWSPEC }));
-      initSpeakingArea(contentPanel);
-      initTypingField(contentPanel);
-      initRightButtonPanel(contentPanel);
-      initCollapseExpandButton(contentPanel);
-      getContentPane().add(contentPanel);
-
-      contentPanel.add(typingField, "1, 3");
-      contentPanel.add(collapseButton, "3, 3");
-      addExpandedElements();
-      setJMenuBar(createMenu());
-      setPreferredSize(EXPANDED);
-      pack();
-      collapsed = new Dimension((int) EXPANDED.getWidth(), getHeight() - speakingPane.getHeight());
-      removeExpandedElements();
+      expandedPanel.add(parseTextButtonPanel, "3, 1");
+      expandedPanel.add(speakingPane, "1, 1");
+      
+      collapsedPanel = new JPanel();
+      collapsedPanel.setLayout(new FormLayout(
+            new ColumnSpec[] { ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
+                  ColumnSpec.decode("50px") },
+            new RowSpec[] { FormFactory.DEFAULT_ROWSPEC }));
+      
       if (PROPERTIES.isScreenCollapsed()) {
          collapse();
       } else {
@@ -209,7 +212,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       addGlobalKeyAdapters(typingField, speakingArea, saveButton, playButton, collapseButton);
    }
 
-   private void initSpeakingArea(JPanel contentPanel) {
+   private void initSpeakingArea() {
       speakingArea = new JTextArea();
       speakingArea.setWrapStyleWord(true);
       speakingArea.setLineWrap(true);
@@ -232,7 +235,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       new EditAdapter(speakingArea);
    }
 
-   private void initRightButtonPanel(JPanel contentPanel) {
+   private void initRightButtonPanel() {
       GridLayout buttonLayout = new GridLayout(2, 0);
       buttonLayout.setVgap(20);
       parseTextButtonPanel = new JPanel(buttonLayout);
@@ -254,7 +257,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       stopButton.setVisible(false);
    }
 
-   private void initTypingField(JPanel contentPanel) {
+   private void initTypingField() {
       typingField = new JTextField();
       typingField.addKeyListener(new KeyAdapter() {
 
@@ -273,7 +276,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       new EditAdapter(typingField);
    }
 
-   private void initCollapseExpandButton(JPanel contentPanel) {
+   private void initCollapseExpandButton() {
       collapseButton = new JButton(Icon.getIcon("/icons/application_top_contract.png"));
       collapseButton.addActionListener(collapseExpandListener);
    }
@@ -281,8 +284,11 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    private void collapse() {
       collapseButton.setIcon(Icon.getIcon("/icons/application_top_expand.png"));
       collapseButton.setToolTipText(MESSAGES.get("expand_tooltip"));
-      removeExpandedElements();
-      setSize(collapsed);
+      getContentPane().remove(expandedPanel);
+      collapsedPanel.add(typingField, "1, 1");
+      collapsedPanel.add(collapseButton, "3, 1");
+      getContentPane().add(collapsedPanel);
+      setSize(COLLAPSED);
       PROPERTIES.setScreenCollapsed(true);
       typingField.grabFocus();
    }
@@ -290,20 +296,13 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    private void expand() {
       collapseButton.setIcon(Icon.getIcon("/icons/application_top_contract.png"));
       collapseButton.setToolTipText(MESSAGES.get("collapse_tooltip"));
-      addExpandedElements();
+      getContentPane().remove(collapsedPanel);
+      expandedPanel.add(typingField, "1, 3");
+      expandedPanel.add(collapseButton, "3, 3");
+      getContentPane().add(expandedPanel);
       setSize(EXPANDED);
       PROPERTIES.setScreenCollapsed(false);
       typingField.grabFocus();
-   }
-
-   private void addExpandedElements() {
-      contentPanel.add(parseTextButtonPanel, "3, 1");
-      contentPanel.add(speakingPane, "1, 1");
-   }
-
-   private void removeExpandedElements() {
-      contentPanel.remove(parseTextButtonPanel);
-      contentPanel.remove(speakingPane);
    }
 
    private JMenuBar createMenu() {
