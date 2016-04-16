@@ -38,6 +38,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -75,6 +76,7 @@ import org.typetalk.data.Suggestions;
 import org.typetalk.speech.Speeker;
 import org.typetalk.speech.Speeker.EndOfSpeechListener;
 
+import com.jgoodies.forms.debug.FormDebugPanel;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -92,7 +94,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    private static final Messages MESSAGES = Messages.getInstance();
    private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
 
-   private static final Dimension EXPANDED = new Dimension(600, 400);
+   private static final Dimension EXPANDED = new Dimension(600, 435);
    private static final Dimension COLLAPSED = new Dimension(600, 75);
 
    private Speeker speeker;
@@ -109,9 +111,9 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    private JMenuItem stopMenuItem;
    private JPanel parseTextButtonPanel;
    private JButton collapseButton;
-
-   private boolean shiftPressed = false;
-   private boolean ctrlPressed = false;
+   private List<JButton> popularPhrasesButtons;
+   private List<ActionListener> popularPhrasesListeners;
+   private JPanel popularPhrasesPanel;
 
    private ActionListener collapseExpandListener = al -> {
       if (PROPERTIES.isScreenCollapsed()) {
@@ -185,23 +187,25 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       initSpeakingArea();
       initTypingField();
       initRightButtonPanel();
+      initPopularPhrasesListeners();
+      initPopularPhrasesButtonPanel();
       initCollapseExpandButton();
 
-      expandedPanel = new JPanel();
+      expandedPanel = new FormDebugPanel();
       expandedPanel.setLayout(new FormLayout(
             new ColumnSpec[] { ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
                   ColumnSpec.decode("50px") },
             new RowSpec[] { RowSpec.decode("fill:default:grow"), FormFactory.RELATED_GAP_ROWSPEC,
-                  FormFactory.DEFAULT_ROWSPEC }));
+                  FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC }));
       expandedPanel.add(parseTextButtonPanel, "3, 1");
+      expandedPanel.add(popularPhrasesPanel, "1, 3");
       expandedPanel.add(speakingPane, "1, 1");
-      
-      collapsedPanel = new JPanel();
-      collapsedPanel.setLayout(new FormLayout(
-            new ColumnSpec[] { ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
-                  ColumnSpec.decode("50px") },
-            new RowSpec[] { FormFactory.DEFAULT_ROWSPEC }));
-      
+
+      collapsedPanel = new FormDebugPanel();
+      collapsedPanel.setLayout(
+            new FormLayout(new ColumnSpec[] { ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
+                  ColumnSpec.decode("50px") }, new RowSpec[] { FormFactory.DEFAULT_ROWSPEC }));
+
       if (PROPERTIES.isScreenCollapsed()) {
          collapse();
       } else {
@@ -210,6 +214,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
 
       ScreenPositioner.centerOnScreen(this);
       addGlobalKeyAdapters(typingField, speakingArea, saveButton, playButton, collapseButton);
+      popularPhrasesButtons.forEach(b -> addGlobalKeyAdapters(b));
    }
 
    private void initSpeakingArea() {
@@ -223,7 +228,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
          @Override
          public void keyPressed(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_TAB) {
-               if (shiftPressed) {
+               if (e.isShiftDown()) {
                   typingField.grabFocus();
                } else {
                   saveButton.grabFocus();
@@ -257,6 +262,36 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       stopButton.setVisible(false);
    }
 
+   private void initPopularPhrasesListeners() {
+      popularPhrasesListeners = new ArrayList<>();
+      for (int i = 0; i < PROPERTIES.getPopularPhrases().length; i++) {
+         final int index = i;
+         popularPhrasesListeners.add(a -> {
+            String popularPhrase = PROPERTIES.getPopularPhrase(index);
+            typingField.setText(popularPhrase);
+            speekTypingFieldContent();
+         });
+      }
+   }
+
+   private void initPopularPhrasesButtonPanel() {
+      popularPhrasesPanel = new FormDebugPanel();
+      popularPhrasesPanel.setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec.decode("default:grow"),
+            FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
+            ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("default:grow"),
+            FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
+            ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("default:grow"),
+            FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
+            ColumnSpec.decode("default:grow") }, new RowSpec[] { FormFactory.DEFAULT_ROWSPEC }));
+      popularPhrasesButtons = new ArrayList<>();
+      for (int i = 0; i < PROPERTIES.getPopularPhrases().length; i++) {
+         JButton popularPhraseButton = new JButton("" + (i + 1));
+         popularPhrasesButtons.add(popularPhraseButton);
+         popularPhrasesPanel.add(popularPhraseButton, String.format("%d, 1", (1 + i * 2)));
+         popularPhraseButton.addActionListener(popularPhrasesListeners.get(i));
+      }
+   }
+
    private void initTypingField() {
       typingField = new JTextField();
       typingField.addKeyListener(new KeyAdapter() {
@@ -264,16 +299,22 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
          @Override
          public void keyReleased(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-               speeker.speek(Arrays.asList(typingField.getText()));
-               speakingArea.setText(speakingArea.getText() + "\n" + typingField.getText());
-               speakingArea.setCaretPosition(speakingArea.getText().length());
-               Suggestions.getInstance().addSuggestion(typingField.getText());
-               typingField.setText("");
-               typingField.requestFocusInWindow();
+               speekTypingFieldContent();
             }
          }
       });
       new EditAdapter(typingField);
+   }
+
+   private void speekTypingFieldContent() {
+      if (!typingField.getText().isEmpty()) {
+         speeker.speek(Arrays.asList(typingField.getText()));
+         Suggestions.getInstance().addSuggestion(typingField.getText());
+      }
+      speakingArea.setText(speakingArea.getText() + "\n" + typingField.getText());
+      speakingArea.setCaretPosition(speakingArea.getText().length());
+      typingField.setText("");
+      typingField.requestFocusInWindow();
    }
 
    private void initCollapseExpandButton() {
@@ -297,8 +338,8 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       collapseButton.setIcon(Icon.getIcon("/icons/application_top_contract.png"));
       collapseButton.setToolTipText(MESSAGES.get("collapse_tooltip"));
       getContentPane().remove(collapsedPanel);
-      expandedPanel.add(typingField, "1, 3");
-      expandedPanel.add(collapseButton, "3, 3");
+      expandedPanel.add(typingField, "1, 5");
+      expandedPanel.add(collapseButton, "3, 5");
       getContentPane().add(expandedPanel);
       setSize(EXPANDED);
       PROPERTIES.setScreenCollapsed(false);
@@ -511,43 +552,24 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    }
 
    private void addGlobalKeyAdapters(Component... components) {
-      Arrays.stream(components).forEach(c -> {
-         c.addKeyListener(new SpecialKeyAdapter());
-         c.addKeyListener(new ShortCutsAdapter());
-      });
-   }
-
-   private class SpecialKeyAdapter extends KeyAdapter {
-
-      @Override
-      public void keyPressed(KeyEvent e) {
-         if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
-            shiftPressed = true;
-         } else if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
-            ctrlPressed = true;
-         }
-      }
-
-      @Override
-      public void keyReleased(KeyEvent e) {
-         if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
-            shiftPressed = false;
-         } else if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
-            ctrlPressed = false;
-         }
-      }
+      Arrays.stream(components).forEach(c -> c.addKeyListener(new ShortCutsAdapter()));
    }
 
    private class ShortCutsAdapter extends KeyAdapter {
 
       @Override
       public void keyPressed(KeyEvent e) {
-         if (ctrlPressed && e.getKeyCode() == KeyEvent.VK_P) {
-            playListener.actionPerformed(null);
-         } else if (ctrlPressed && e.getKeyCode() == KeyEvent.VK_S) {
-            saveListener.actionPerformed(null);
-         } else if (ctrlPressed && e.getKeyCode() == KeyEvent.VK_E) {
-            collapseExpandListener.actionPerformed(null);
+         if (e.isControlDown()) {
+            if (e.getKeyCode() == KeyEvent.VK_P) {
+               playListener.actionPerformed(null);
+            } else if (e.getKeyCode() == KeyEvent.VK_S) {
+               saveListener.actionPerformed(null);
+            } else if (e.getKeyCode() == KeyEvent.VK_E) {
+               collapseExpandListener.actionPerformed(null);
+            } else if (e.getKeyCode() >= KeyEvent.VK_1 && e.getKeyCode() <= KeyEvent.VK_9) {
+               int index = e.getKeyCode() - KeyEvent.VK_1;
+               popularPhrasesListeners.get(index).actionPerformed(null);
+            }
          }
       }
    }

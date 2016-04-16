@@ -31,11 +31,12 @@ public class TypeTalkProperties implements Properties {
    public static final boolean DEFAULT_SPLASH_SCREEN_ENABLED = true;
    public static final boolean DEFAULT_WELCOME_SCREEN_ENABLED = true;
    public static final boolean DEFAULT_START_MINIMIZED = false;
-   public static final boolean DEFAULT_SCREEN_COLLAPSED = false;
+   public static final boolean DEFAULT_SCREEN_COLLAPSED = true;
    public static final String DEFAULT_VOICE = "DFKI_OBADIAH";
    public static final int DEFAULT_DOUBLE_CLICK_DELAY = 250;
    public static final int DEFAULT_TOAST_TIME = 3000;
    public static final String DEFAULT_SETTINGS_DIRECTORY = ".typetalk";
+   private static final String DEFAULT_POPULAR_PHRASES = " , , , , , , , , ";
 
    private static final String KEY_LANGUAGE = "language";
    private static final String KEY_COUNTRY = "country";
@@ -48,6 +49,7 @@ public class TypeTalkProperties implements Properties {
    private static final String KEY_DOUBLE_CLICK_DELAY = "doubleclickdelay";
    private static final String KEY_TOAST_TIME = "toasttime";
    private static final String KEY_SETTINGS_DIRECTORY = "settingsdirectory";
+   private static final String KEY_POPULAR_PHRASES = "popularphrases";
 
    private static TypeTalkProperties instance;
    private boolean nativeHookEnabled = true;
@@ -106,11 +108,11 @@ public class TypeTalkProperties implements Properties {
    public boolean isStartMinimized() {
       return userPreferences.getBoolean(KEY_START_MINIMIZED, DEFAULT_START_MINIMIZED);
    }
-   
+
    public void setScreenCollapsed(boolean screenCollapsed) {
       userPreferences.putBoolean(KEY_SCREEN_COLLAPSED, screenCollapsed);
    }
-   
+
    public boolean isScreenCollapsed() {
       return userPreferences.getBoolean(KEY_SCREEN_COLLAPSED, DEFAULT_SCREEN_COLLAPSED);
    }
@@ -165,7 +167,7 @@ public class TypeTalkProperties implements Properties {
    public void setToastTime(int toastTime) {
       userPreferences.putInt(KEY_TOAST_TIME, toastTime);
    }
-   
+
    @Override
    public String getLaf() {
       return userPreferences.get(KEY_LAF, DEFAULT_LAF);
@@ -175,12 +177,31 @@ public class TypeTalkProperties implements Properties {
    public void setLaf(String laf) {
       userPreferences.put(KEY_LAF, laf);
    }
-   
+
    public String getSettingsDirectory() {
       return userPreferences.get(KEY_SETTINGS_DIRECTORY, DEFAULT_SETTINGS_DIRECTORY);
    }
-   
+
    public void setSettingsDirectory(String settingsDirectory) {
       userPreferences.put(KEY_SETTINGS_DIRECTORY, settingsDirectory);
+   }
+
+   public String[] getPopularPhrases() {
+      return userPreferences.get(KEY_POPULAR_PHRASES, DEFAULT_POPULAR_PHRASES).split(",");
+   }
+
+   private void setPopularPhrases(String[] popularPhrases) {
+      userPreferences.put(KEY_POPULAR_PHRASES,
+            Arrays.toString(popularPhrases).replaceAll("\\[", "").replaceAll("\\]", ""));
+   }
+   
+   public String getPopularPhrase(int index) {
+      return getPopularPhrases()[index].trim();
+   }
+   
+   public void setPopularPhrase(String phrase, int index) {
+      String[] popularPhrases = getPopularPhrases();
+      popularPhrases[index] = phrase;
+      setPopularPhrases(popularPhrases);
    }
 }
