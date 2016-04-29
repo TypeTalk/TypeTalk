@@ -292,10 +292,10 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       }
       reinitPopularPhrasesButtonsTooltip();
    }
-   
+
    private void reinitPopularPhrasesButtonsTooltip() {
       for (int i = 0; i < PROPERTIES.getPopularPhrases().length; i++) {
-         if(!PROPERTIES.getPopularPhrase(i).isEmpty()) {
+         if (!PROPERTIES.getPopularPhrase(i).isEmpty()) {
             popularPhrasesButtons.get(i).setToolTipText(PROPERTIES.getPopularPhrase(i) + " (Ctrl " + (i + 1) + ")");
          } else {
             popularPhrasesButtons.get(i).setToolTipText(null);
@@ -463,8 +463,17 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
          }
       });
       configureMenu.add(configureGuiItem);
-      
-      JMenuItem configurePopularPhrasesItem = new JMenuItem(MESSAGES.get("popular_phrases_config_title"), Icon.getIcon("/icons/tag_blue_edit.png"));
+
+      JMenuItem configurePopularPhrasesItem = new JMenuItem(MESSAGES.get("popular_phrases_config_title"),
+            Icon.getIcon("/icons/tag_blue_edit.png"));
+      configurePopularPhrasesItem.setMnemonic(KeyEvent.VK_P);
+      configurePopularPhrasesItem.addActionListener(a -> {
+         PopularPhrasesConfigDialog dialog = new PopularPhrasesConfigDialog(ApplicationWindow.this);
+         dialog.setVisible(true);
+         if (dialog.isOkPressed()) {
+            reinitPopularPhrasesButtonsTooltip();
+         }
+      });
       configureMenu.add(configurePopularPhrasesItem);
 
       JMenu playMenu = new JMenu(MESSAGES.get("play"));
@@ -479,12 +488,13 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       stopMenuItem = new JMenuItem(MESSAGES.get("stop"), Icon.getIcon("/icons/control_stop.png"));
       stopMenuItem.setMnemonic(KeyEvent.VK_T);
       stopMenuItem.addActionListener(stopListener);
+      stopMenuItem.setEnabled(false);
       playMenu.add(stopMenuItem);
 
       JMenu viewMenu = new JMenu(MESSAGES.get("view"));
       viewMenu.setMnemonic(KeyEvent.VK_V);
       menuBar.add(viewMenu);
-      
+
       expandItem = new JMenuItem(MESSAGES.get("expand"), Icon.getIcon("/icons/application_top_expand.png"));
       expandItem.setMnemonic(KeyEvent.VK_X);
       expandItem.addActionListener(collapseExpandListener);
@@ -494,7 +504,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       collapseItem.setMnemonic(KeyEvent.VK_C);
       collapseItem.addActionListener(collapseExpandListener);
       viewMenu.add(collapseItem);
-      
+
       JMenu helpMenu = new JMenu(MESSAGES.get("help"));
       helpMenu.setMnemonic(KeyEvent.VK_H);
       menuBar.add(helpMenu);
