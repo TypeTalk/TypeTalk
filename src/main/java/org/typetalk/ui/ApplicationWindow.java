@@ -76,7 +76,6 @@ import org.typetalk.data.Suggestions;
 import org.typetalk.speech.Speeker;
 import org.typetalk.speech.Speeker.EndOfSpeechListener;
 
-import com.jgoodies.forms.debug.FormDebugPanel;
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -110,7 +109,9 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    private JButton stopButton;
    private JMenuItem stopMenuItem;
    private JPanel parseTextButtonPanel;
-   private JButton collapseButton;
+   private JButton collapseExpandButton;
+   private JMenuItem expandItem;
+   private JMenuItem collapseItem;
    private List<JButton> popularPhrasesButtons;
    private List<ActionListener> popularPhrasesListeners;
    private JPanel popularPhrasesPanel;
@@ -191,17 +192,16 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       initPopularPhrasesButtonPanel();
       initCollapseExpandButton();
 
-      expandedPanel = new FormDebugPanel();
+      expandedPanel = new JPanel();
       expandedPanel.setLayout(new FormLayout(
             new ColumnSpec[] { ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
                   ColumnSpec.decode("50px") },
             new RowSpec[] { RowSpec.decode("fill:default:grow"), FormFactory.RELATED_GAP_ROWSPEC,
                   FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC }));
       expandedPanel.add(parseTextButtonPanel, "3, 1");
-      expandedPanel.add(popularPhrasesPanel, "1, 3");
       expandedPanel.add(speakingPane, "1, 1");
 
-      collapsedPanel = new FormDebugPanel();
+      collapsedPanel = new JPanel();
       collapsedPanel.setLayout(
             new FormLayout(new ColumnSpec[] { ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
                   ColumnSpec.decode("50px") }, new RowSpec[] { FormFactory.DEFAULT_ROWSPEC }));
@@ -213,7 +213,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       }
 
       ScreenPositioner.centerOnScreen(this);
-      addGlobalKeyAdapters(typingField, speakingArea, saveButton, playButton, collapseButton);
+      addGlobalKeyAdapters(typingField, speakingArea, saveButton, playButton, collapseExpandButton);
       popularPhrasesButtons.forEach(b -> addGlobalKeyAdapters(b));
    }
 
@@ -275,7 +275,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    }
 
    private void initPopularPhrasesButtonPanel() {
-      popularPhrasesPanel = new FormDebugPanel();
+      popularPhrasesPanel = new JPanel();
       popularPhrasesPanel.setLayout(new FormLayout(new ColumnSpec[] { ColumnSpec.decode("default:grow"),
             FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
             ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC, ColumnSpec.decode("default:grow"),
@@ -289,6 +289,17 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
          popularPhrasesButtons.add(popularPhraseButton);
          popularPhrasesPanel.add(popularPhraseButton, String.format("%d, 1", (1 + i * 2)));
          popularPhraseButton.addActionListener(popularPhrasesListeners.get(i));
+      }
+      reinitPopularPhrasesButtonsTooltip();
+   }
+   
+   private void reinitPopularPhrasesButtonsTooltip() {
+      for (int i = 0; i < PROPERTIES.getPopularPhrases().length; i++) {
+         if(!PROPERTIES.getPopularPhrase(i).isEmpty()) {
+            popularPhrasesButtons.get(i).setToolTipText(PROPERTIES.getPopularPhrase(i) + " (Ctrl " + (i + 1) + ")");
+         } else {
+            popularPhrasesButtons.get(i).setToolTipText(null);
+         }
       }
    }
 
@@ -318,16 +329,18 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    }
 
    private void initCollapseExpandButton() {
-      collapseButton = new JButton(Icon.getIcon("/icons/application_top_contract.png"));
-      collapseButton.addActionListener(collapseExpandListener);
+      collapseExpandButton = new JButton(Icon.getIcon("/icons/application_top_contract.png"));
+      collapseExpandButton.addActionListener(collapseExpandListener);
    }
 
    private void collapse() {
-      collapseButton.setIcon(Icon.getIcon("/icons/application_top_expand.png"));
-      collapseButton.setToolTipText(MESSAGES.get("expand_tooltip"));
+      collapseItem.setEnabled(false);
+      expandItem.setEnabled(true);
+      collapseExpandButton.setIcon(Icon.getIcon("/icons/application_top_expand.png"));
+      collapseExpandButton.setToolTipText(MESSAGES.get("expand_tooltip"));
       getContentPane().remove(expandedPanel);
       collapsedPanel.add(typingField, "1, 1");
-      collapsedPanel.add(collapseButton, "3, 1");
+      collapsedPanel.add(collapseExpandButton, "3, 1");
       getContentPane().add(collapsedPanel);
       setSize(COLLAPSED);
       PROPERTIES.setScreenCollapsed(true);
@@ -335,11 +348,14 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    }
 
    private void expand() {
-      collapseButton.setIcon(Icon.getIcon("/icons/application_top_contract.png"));
-      collapseButton.setToolTipText(MESSAGES.get("collapse_tooltip"));
+      collapseItem.setEnabled(true);
+      expandItem.setEnabled(false);
+      collapseExpandButton.setIcon(Icon.getIcon("/icons/application_top_contract.png"));
+      collapseExpandButton.setToolTipText(MESSAGES.get("collapse_tooltip"));
       getContentPane().remove(collapsedPanel);
       expandedPanel.add(typingField, "1, 5");
-      expandedPanel.add(collapseButton, "3, 5");
+      expandedPanel.add(popularPhrasesPanel, "1, 3");
+      expandedPanel.add(collapseExpandButton, "3, 5");
       getContentPane().add(expandedPanel);
       setSize(EXPANDED);
       PROPERTIES.setScreenCollapsed(false);
@@ -447,6 +463,9 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
          }
       });
       configureMenu.add(configureGuiItem);
+      
+      JMenuItem configurePopularPhrasesItem = new JMenuItem(MESSAGES.get("popular_phrases_config_title"), Icon.getIcon("/icons/tag_blue_edit.png"));
+      configureMenu.add(configurePopularPhrasesItem);
 
       JMenu playMenu = new JMenu(MESSAGES.get("play"));
       playMenu.setMnemonic(KeyEvent.VK_P);
@@ -462,6 +481,20 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       stopMenuItem.addActionListener(stopListener);
       playMenu.add(stopMenuItem);
 
+      JMenu viewMenu = new JMenu(MESSAGES.get("view"));
+      viewMenu.setMnemonic(KeyEvent.VK_V);
+      menuBar.add(viewMenu);
+      
+      expandItem = new JMenuItem(MESSAGES.get("expand"), Icon.getIcon("/icons/application_top_expand.png"));
+      expandItem.setMnemonic(KeyEvent.VK_X);
+      expandItem.addActionListener(collapseExpandListener);
+      viewMenu.add(expandItem);
+
+      collapseItem = new JMenuItem(MESSAGES.get("collapse"), Icon.getIcon("/icons/application_top_contract.png"));
+      collapseItem.setMnemonic(KeyEvent.VK_C);
+      collapseItem.addActionListener(collapseExpandListener);
+      viewMenu.add(collapseItem);
+      
       JMenu helpMenu = new JMenu(MESSAGES.get("help"));
       helpMenu.setMnemonic(KeyEvent.VK_H);
       menuBar.add(helpMenu);
