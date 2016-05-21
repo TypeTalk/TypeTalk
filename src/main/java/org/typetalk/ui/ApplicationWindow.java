@@ -93,8 +93,11 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    private static final Messages MESSAGES = Messages.getInstance();
    private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
 
-   private static final Dimension EXPANDED = new Dimension(600, 435);
-   private static final Dimension COLLAPSED = new Dimension(600, 75);
+   private Dimension expandedSize = new Dimension(600, 440);
+   private Dimension collapsedSize = new Dimension(600, 80);
+   private int expandedContentPaneHeight = 415;
+   private int collapsedContentPaneHeight = 55;
+   private boolean firstTimeVisible = true;
 
    private Speeker speeker;
 
@@ -122,6 +125,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       } else {
          collapse();
       }
+      PROPERTIES.setScreenCollapsed(!PROPERTIES.isScreenCollapsed());
    };
 
    private ActionListener playListener = al -> {
@@ -177,6 +181,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    public void setVisible(boolean visible) {
       super.setVisible(visible);
       typingField.grabFocus();
+      new Thread(() -> calculateScreenSize()).start();
    }
 
    private void initGui() {
@@ -333,6 +338,27 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       collapseExpandButton.addActionListener(collapseExpandListener);
    }
 
+   private void calculateScreenSize() {
+      if (firstTimeVisible) {
+         try {
+            Thread.sleep(500);
+         } catch (InterruptedException e1) {
+            log.error("Calculate screen interrupted");
+         }
+         double conentPaneHeight = getSize().getHeight() - getContentPane().getSize().getHeight();
+         collapsedSize = new Dimension((int) collapsedSize.getWidth(),
+               collapsedContentPaneHeight + (int) conentPaneHeight);
+         expandedSize = new Dimension((int) expandedSize.getWidth(),
+               expandedContentPaneHeight + (int) conentPaneHeight);
+         if (PROPERTIES.isScreenCollapsed()) {
+            SwingUtilities.invokeLater(() -> collapse());
+         } else {
+            SwingUtilities.invokeLater(() -> expand());
+         }
+         firstTimeVisible = false;
+      }
+   }
+
    private void collapse() {
       collapseItem.setEnabled(false);
       expandItem.setEnabled(true);
@@ -342,8 +368,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       collapsedPanel.add(typingField, "1, 1");
       collapsedPanel.add(collapseExpandButton, "3, 1");
       getContentPane().add(collapsedPanel);
-      setSize(COLLAPSED);
-      PROPERTIES.setScreenCollapsed(true);
+      setSize(collapsedSize);
       typingField.grabFocus();
    }
 
@@ -357,8 +382,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       expandedPanel.add(popularPhrasesPanel, "1, 3");
       expandedPanel.add(collapseExpandButton, "3, 5");
       getContentPane().add(expandedPanel);
-      setSize(EXPANDED);
-      PROPERTIES.setScreenCollapsed(false);
+      setSize(expandedSize);
       typingField.grabFocus();
    }
 
