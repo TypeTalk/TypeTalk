@@ -35,9 +35,13 @@
 			batteries included</h2>
 
 
-		<a href="https://github.com/TypeTalk/TypeTalk/releases/download/v1.3/typetalk-1.3-1.3.noarch.rpm" class="btn">Download rpm</a>
-		<a href="https://github.com/TypeTalk/TypeTalk/releases/download/v1.3/typetalk_1.3_all.deb" class="btn">Download deb</a>
-		<a href="https://github.com/TypeTalk/TypeTalk/releases/download/v1.3/TypeTalk.one-jar.jar" class="btn">Download Platform independent jar</a>
+		<a
+			href="https://github.com/TypeTalk/TypeTalk/releases/download/v1.4/typetalk-1.4-1.4.noarch.rpm"
+			class="btn">Download rpm</a> <a
+			href="https://github.com/TypeTalk/TypeTalk/releases/download/v1.4/typetalk_1.4_all.deb"
+			class="btn">Download deb</a> <a
+			href="https://github.com/TypeTalk/TypeTalk/releases/download/v1.4/TypeTalk.one-jar.jar"
+			class="btn">Download Platform independent jar</a>
 	</section>
 
 	<section class="main-content">
@@ -48,11 +52,16 @@
 			TypeTalk.
 		</h3>
 
-		<p>TypeTalk is a Text to Speech frontend aiming to be as simple as possible. TypeTalk uses <a href="http://mary.dfki.de/">MaryTTS</a> in the background and includes
-			several voices. At this moment only English voices are included.</p>
+		<p>
+			TypeTalk is a Text to Speech frontend aiming to be as simple as
+			possible. TypeTalk uses <a href="http://mary.dfki.de/">MaryTTS</a> in
+			the background and includes several voices. At this moment only
+			English voices are included.
+		</p>
 
 		<p style="text-align: center;">
-			<img src="images/MainWindow.png" alt="Screenshot main window">
+			<img src="images/MainWindowCollapsed.png"
+				alt="Screenshot main window collapsed">
 		</p>
 
 		<h3>
@@ -67,51 +76,31 @@
 				href="http://openjdk.java.net/">OpenJDK-jre 8</a> or <a
 				href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">Oracle
 				JDK-jre 8</a>.
-		<p>TypeTalk has two areas for typing. A single-row bottom text
-			field to let you enter text. When TypeTalk pops up this text field
-			grabs the focus and you can start typing. When you hit the enter key
-			the text is moved to the top text area and TypeTalk speaks the words
-			you typed. This way of using TypeTalk is similar to using a messaging
-			program.</p>
+		<p>TypeTalk is meant to run in the background and be ready at your
+			command. With a configurable global shortcut TypeTalk pops up and is
+			ready to speek. In its default state the TypeTalk window only shows a
+			single text field and you can start typing right away. When hitting
+			'Enter' TypeTalk will 'speak' the typed sentence. This way of using
+			TypeTalk is similar to using a messaging program.</p>
+		<p>
+			The TypeTalk window can be expanded using the expand button. In this
+			mode TypeTalk has two areas for typing. The single-row text field to
+			enter text and a text area on top that is meant for larger portions
+			of text. When you hit the 'play' button on the bottom right the text
+			is spoken to you. With the 'save' button you can save the output to a
+			wave file. When TypeTalk encounters a word that the <a
+				href="http://mary.dfki.de/">MaryTTS</a> back-end cannot pronounce it
+			shows a little popup at the top-right corner of your screen with the
+			unpronounceable word. You can correct your text in the top text area
+			to enable TypeTalk saving the complete message. A couple of
+			(configurable) commonly used phrases are ready at the 9 buttons below
+			the text area.
+		</p>
 
-		<p>The top text area is meant for larger portions of text. When
-			you hit the 'play' button on the bottom right the text is spoken to
-			you. With the 'save' button you can save the output to a wave file.
-			When TypeTalk encounters a word that the <a href="http://mary.dfki.de/">MaryTTS</a> back-end cannot
-			pronounce it shows a little popup at the top-right corner of your
-			screen with the unpronounceable word. You can correct the text in the
-			top text area to enable a complete message.</p>
-
-		<p>TypeTalk can be started with a minimized window in order to let
-			you load it at login and have it waiting for you when you need it.
-			With a keyboard shortcut TypeTalk will be at your service.</p>
-
-		<h3>
-			<a id="configure-the-included-voices" class="anchor"
-				href="#configure-the-included-voices" aria-hidden="true"><span
-				aria-hidden="true" class="octicon octicon-link"></span></a>Configure the
-			included voices
-		</h3>
-
-		<p>You can configure the voices by clicking 'Configure' -
-			&gt;'Configure voice'. All configuration options in the dialog show a
-			little help button with a explanation about the effect. You can
-			listen to the effect through a text field and play button at the
-			bottom of the dialog.</p>
-
-		<h3>
-			<a id="configure-the-interface" class="anchor"
-				href="#configure-the-interface" aria-hidden="true"><span
-				aria-hidden="true" class="octicon octicon-link"></span></a>Configure the
-			interface
-		</h3>
-
-		<p>You can configure the behaviour of TypeTalk by clicking
-			'Configure' -&gt; 'Configure graphical interface'. Through this
-			dialog you can disable the splashscreen, the welcome screen at
-			startup and whether TypeTalk should be started minimized or not. In
-			this dialog you can also change the keyboard shortcut for toggling
-			the visibility of the ui.</p>
+		<p style="text-align: center;">
+			<img src="images/MainWindowExpanded.png"
+				alt="Screenshot main window exanded">
+		</p>
 
 		<h3>
 			<a id="support-or-contact" class="anchor" href="#support-or-contact"
@@ -129,8 +118,8 @@
 		<footer class="site-footer">
 			<span class="site-footer-owner"><a
 				href="https://github.com/TypeTalk/TypeTalk">TypeTalk</a> is
-				maintained by <a href="https://github.com/TypeTalk">TypeTalk</a> and distributed under the Gnu
-			Public License.</span> <span
+				maintained by <a href="https://github.com/TypeTalk">TypeTalk</a> and
+				distributed under the Gnu Public License.</span> <span
 				class="site-footer-credits">This page was generated by <a
 				href="https://pages.github.com">GitHub Pages</a> using the <a
 				href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by
