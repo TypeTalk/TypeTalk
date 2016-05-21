@@ -21,6 +21,8 @@ package org.typetalk.ui;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -125,6 +127,16 @@ public class PopularPhrasesConfigDialog extends JDialog {
       btnCancel.addActionListener(e -> setVisible(false));
       actionPanel.add(btnCancel, "7, 1, 2, 1");
 
+      JButton btnDefaults = new JButton(MESSAGES.get("load_defaults"));
+      btnDefaults.addActionListener(new ActionListener() {
+
+         @Override
+         public void actionPerformed(ActionEvent e) {
+            setDefaults();
+         }
+      });
+      actionPanel.add(btnDefaults, "3, 1");
+
       JButton btnOk = new JButton(MESSAGES.get("ok"));
       btnOk.addActionListener(e -> {
          saveConfiguration();
@@ -137,6 +149,12 @@ public class PopularPhrasesConfigDialog extends JDialog {
    private void saveConfiguration() {
       for (int i = 0; i < PROPERTIES.getPopularPhrases().length; i++) {
          PROPERTIES.setPopularPhrase(textFields.get(i).getText().trim(), i);
+      }
+   }
+   
+   private void setDefaults() {
+      for (int i = 0; i < TypeTalkProperties.DEFAULT_POPULAR_PHRASES.split(",").length; i++) {
+         textFields.get(i).setText(TypeTalkProperties.DEFAULT_POPULAR_PHRASES.split(",")[i]);
       }
    }
 }
