@@ -59,7 +59,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
@@ -81,6 +80,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
+import fr.pud.client.view.jsuggestfield.JSuggestField;
 import lombok.extern.slf4j.Slf4j;
 import marytts.exceptions.MaryConfigurationException;
 import raging.goblin.swingutils.HelpBrowser;
@@ -103,7 +103,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
 
    private JPanel expandedPanel;
    private JPanel collapsedPanel;
-   private JTextField typingField;
+   private JSuggestField typingField;
    private JScrollPane speakingPane;
    private JTextArea speakingArea;
    private JButton saveButton;
@@ -309,13 +309,18 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    }
 
    private void initTypingField() {
-      typingField = new JTextField();
+      typingField = new JSuggestField(this, Suggestions.getInstance().getSuggestions());
       typingField.addKeyListener(new KeyAdapter() {
 
          @Override
          public void keyReleased(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-               speekTypingFieldContent();
+               if (typingField.isSuggestionAccepted()) {
+                  typingField.setSuggestionAccepted(false);
+               } else {
+                  speekTypingFieldContent();
+                  typingField.hideSuggest();
+               }
             }
          }
       });
