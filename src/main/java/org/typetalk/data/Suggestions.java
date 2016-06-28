@@ -25,14 +25,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.typetalk.TypeTalkProperties;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -42,14 +45,15 @@ public final class Suggestions {
    private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
    private static Suggestions instance;
 
+   private ObjectMapper mapper = new ObjectMapper();
    private Path suggestionsFile;
    private Executor writeFileExecutor = Executors.newSingleThreadExecutor();
-
-   @Getter
-   private List<String> suggestions = new ArrayList<>();
+   private Map<String, Suggestion> suggestions = new HashMap<>();
+   private List<String> suggestionValues = new ArrayList<>();
+   private SuggestionComparator suggestionComparator = new SuggestionComparator();
 
    private Suggestions() {
-      suggestionsFile = Paths.get(PROPERTIES.getSettingsDirectory() + File.separator + "suggestions.txt");
+      suggestionsFile = Paths.get(PROPERTIES.getSettingsDirectory() + File.separator + "suggestions.json");
       initSuggestionsFile();
       readSuggestions();
    }
@@ -61,21 +65,33 @@ public final class Suggestions {
       return instance;
    }
 
-   public void addSuggestion(String suggestion) {
+   public void addSuggestion(String suggestionValue) {
       synchronized (suggestions) {
-         suggestions.remove(suggestion);
-         suggestions.add(suggestion);
-         if (suggestions.size() > SIZE_LIMIT) {
-            suggestions.remove(0);
+         Suggestion suggestion = suggestions.get(suggestionValue);
+         if (suggestion == null) {
+            suggestion = new Suggestion(suggestionValue, 0);
+            suggestions.put(suggestionValue, suggestion);
+            suggestionValues.add(suggestionValue);
          }
+         suggestion.setCount(suggestion.getCount() + 1);
+         suggestionValues.sort(suggestionComparator);
+         if (suggestions.size() > SIZE_LIMIT) {
+            String lastSuggestionValue = suggestionValues.get(suggestionValues.size() - 1);
+            suggestions.remove(lastSuggestionValue);
+            suggestionValues.remove(lastSuggestionValue);
+         }
+         writeSuggestionsToFile();
       }
-      writeSuggestionsToFile();
+   }
+
+   public List<String> getSuggestions() {
+      return suggestionValues;
    }
 
    private void writeSuggestionsToFile() {
       writeFileExecutor.execute(() -> {
          try {
-            Files.write(suggestionsFile, StringUtils.join(suggestions, System.lineSeparator()).getBytes());
+            mapper.writeValue(suggestionsFile.toFile(), suggestions.values());
          } catch (Exception e) {
             log.error("Unable to write suggestions file", e);
          }
@@ -94,9 +110,30 @@ public final class Suggestions {
 
    private void readSuggestions() {
       try {
-         suggestions = Files.readAllLines(suggestionsFile);
+         List<Suggestion> suggestionsFromFile = mapper.readValue(suggestionsFile.toFile(),
+               new TypeReference<List<Suggestion>>() {
+               });
+         for (Suggestion suggestion : suggestionsFromFile) {
+            suggestionValues.add(suggestion.getValue());
+            suggestions.put(suggestion.getValue(), suggestion);
+         }
+         suggestionValues.sort(suggestionComparator);
       } catch (IOException e) {
          log.error("Unable to read suggestions file", e);
+      }
+   }
+
+   private class SuggestionComparator implements Comparator<String> {
+
+      @Override
+      public int compare(String s1, String s2) {
+         if (suggestions.get(s1) != null && suggestions.get(s2) != null) {
+            if (suggestions.get(s1).getCount() == suggestions.get(s2).getCount()) {
+               return s1.compareTo(s2);
+            }
+            return Integer.compare(suggestions.get(s2).getCount(), suggestions.get(s1).getCount());
+         }
+         return 0;
       }
    }
 }
