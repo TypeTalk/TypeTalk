@@ -37,6 +37,7 @@ public class TypeTalkProperties implements Properties {
    public static final int DEFAULT_TOAST_TIME = 3000;
    public static final String DEFAULT_SETTINGS_DIRECTORY = ".typetalk";
    public static final String DEFAULT_POPULAR_PHRASES = "Yes,No,Yes please,No thanks,Ok,Fine,Hello,Goodbye,Thank you";
+   public static final boolean DEFAULT_SUGGESTIONS_ENABLED = true; 
 
    private static final String KEY_LANGUAGE = "language";
    private static final String KEY_COUNTRY = "country";
@@ -50,6 +51,7 @@ public class TypeTalkProperties implements Properties {
    private static final String KEY_TOAST_TIME = "toasttime";
    private static final String KEY_SETTINGS_DIRECTORY = "settingsdirectory";
    private static final String KEY_POPULAR_PHRASES = "popularphrases";
+   private static final String KEY_SUGGESTIONS_ENABLED = "suggestionsenabled"; 
 
    private static TypeTalkProperties instance;
    private boolean nativeHookEnabled = true;
@@ -95,6 +97,14 @@ public class TypeTalkProperties implements Properties {
 
    public void setWelcomeScreenEnabled(boolean welcomeScreenEnabled) {
       userPreferences.putBoolean(KEY_WELCOME_SCREEN_ENABLED, welcomeScreenEnabled);
+   }
+   
+   public boolean isSuggestionsEnabled() {
+      return userPreferences.getBoolean(KEY_SUGGESTIONS_ENABLED, DEFAULT_SUGGESTIONS_ENABLED);
+   }
+   
+   public void setSuggestionsEnabled(boolean suggestionsEnabled) {
+      userPreferences.putBoolean(KEY_SUGGESTIONS_ENABLED, suggestionsEnabled);
    }
 
    public boolean isWelcomeScreenEnabled() {

@@ -61,6 +61,7 @@ public class GuiConfigDialog extends JDialog {
    private JCheckBox chckbxSplashScreenEnabled;
    private JCheckBox chckbxWelcomeScreenEnabled;
    private JCheckBox chckbxStartMinimized;
+   private JCheckBox chckbxShowSuggestions;
    private JLabel nativeHookLabel;
    private JComboBox<LookAndFeel> lafComboBox;
 
@@ -93,13 +94,15 @@ public class GuiConfigDialog extends JDialog {
                   FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
                   FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
                   FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
+                  FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC,
+                  FormFactory.RELATED_GAP_ROWSPEC, FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
                   FormFactory.DEFAULT_ROWSPEC, RowSpec.decode("default:grow"), }));
 
       StringSeparator lafSeparator = new StringSeparator(MESSAGES.get("laf"));
       configPanel.add(lafSeparator, "1, 7, 5, 1");
 
       LookAndFeel[] allLafs = LookAndFeel.getAll();
-      lafComboBox = new JComboBox<LookAndFeel>(allLafs);
+      lafComboBox = new JComboBox<>(allLafs);
       LookAndFeel selectedLaf = Arrays.stream(allLafs).filter(l -> l.getName().equals(PROPERTIES.getLaf())).findFirst()
             .get();
       lafComboBox.setSelectedItem(selectedLaf);
@@ -152,6 +155,16 @@ public class GuiConfigDialog extends JDialog {
          }
          dialog.dispose();
       });
+      
+      StringSeparator suggestionsSeparator = new StringSeparator(MESSAGES.get("suggestions"));
+      configPanel.add(suggestionsSeparator, "1, 25, 5, 1");
+      
+      JLabel lblSuggestions = new JLabel(MESSAGES.get("enabled"));
+      configPanel.add(lblSuggestions, "2, 27, 3, 1, right, center");
+      
+      chckbxShowSuggestions = new JCheckBox();
+      chckbxShowSuggestions.setSelected(PROPERTIES.isSuggestionsEnabled());
+      configPanel.add(chckbxShowSuggestions, "5, 27");
    }
 
    private void initActionsPanel() {
@@ -189,15 +202,21 @@ public class GuiConfigDialog extends JDialog {
       PROPERTIES.setNativeHookEnabled(nativeHookKeyCodes.length > 0);
       PROPERTIES.setNativeHookKeyCodes(nativeHookKeyCodes);
       PROPERTIES.setLaf(((LookAndFeel) lafComboBox.getSelectedItem()).getName());
+      PROPERTIES.setSuggestionsEnabled(chckbxShowSuggestions.isSelected());
    }
 
    private void checkSettingsChanged() {
       settingsChanged = !Arrays.equals(PROPERTIES.getNativeHookKeyCodes(), nativeHookKeyCodes)
-            || !((LookAndFeel) lafComboBox.getSelectedItem()).getName().equals(PROPERTIES.getLaf());
+            || !((LookAndFeel) lafComboBox.getSelectedItem()).getName().equals(PROPERTIES.getLaf())
+            || chckbxShowSuggestions.isSelected() != PROPERTIES.isSuggestionsEnabled();
    }
 
    private String getNativeHookText(int[] nativeHookKeyCodes) {
       return Arrays.stream(nativeHookKeyCodes).mapToObj(kc -> NativeKeyEvent.getKeyText(kc))
             .collect(Collectors.joining(", "));
+   }
+   
+   public static void main(String[] args) {
+      new GuiConfigDialog(null).setVisible(true);
    }
 }
