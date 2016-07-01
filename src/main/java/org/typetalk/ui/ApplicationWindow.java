@@ -59,6 +59,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
@@ -103,7 +104,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
 
    private JPanel expandedPanel;
    private JPanel collapsedPanel;
-   private JSuggestField typingField;
+   private JTextField typingField;
    private JScrollPane speakingPane;
    private JTextArea speakingArea;
    private JButton saveButton;
@@ -162,11 +163,11 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       super(MESSAGES.get("client_window_title"));
       this.speeker = speeker;
       speeker.addEndOfSpeechListener(this);
-      initGui();
-      if (PROPERTIES.isNativeHookEnabled()) {
-         initNativeHook();
-      }
       setDefaultCloseOperation(EXIT_ON_CLOSE);
+      if (PROPERTIES.isNativeHookEnabled()) {
+          initNativeHook();
+      }
+      initGui();
    }
 
    @Override
@@ -180,8 +181,8 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    @Override
    public void setVisible(boolean visible) {
       super.setVisible(visible);
+      calculateScreenSize();
       typingField.grabFocus();
-      new Thread(() -> calculateScreenSize()).start();
    }
 
    private void initGui() {
@@ -274,7 +275,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
          popularPhrasesListeners.add(a -> {
             String popularPhrase = PROPERTIES.getPopularPhrase(index);
             typingField.setText(popularPhrase);
-            speekTypingFieldContent();
+            speekTypingFieldContent(false);
          });
       }
    }
@@ -309,7 +310,26 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    }
 
    private void initTypingField() {
-      typingField = new JSuggestField(this, Suggestions.getInstance().getSuggestions());
+      typingField = PROPERTIES.isSuggestionsEnabled() ? createSuggestField() : createTextField();
+   }
+
+   private JTextField createTextField() {
+      JTextField typingField = new JTextField();
+      typingField.addKeyListener(new KeyAdapter() {
+
+         @Override
+         public void keyPressed(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+               speekTypingFieldContent(false);
+            }
+         }
+      });
+      new EditAdapter(typingField);
+      return typingField;
+   }
+
+   private JTextField createSuggestField() {
+      JSuggestField typingField = new JSuggestField(this, Suggestions.getInstance().getSuggestions());
       typingField.addKeyListener(new KeyAdapter() {
 
          @Override
@@ -318,19 +338,22 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
                if (typingField.isSuggestionAccepted()) {
                   typingField.setSuggestionAccepted(false);
                } else {
-                  speekTypingFieldContent();
+                  speekTypingFieldContent(true);
                   typingField.hideSuggest();
                }
             }
          }
       });
       new EditAdapter(typingField);
+      return typingField;
    }
 
-   private void speekTypingFieldContent() {
+   private void speekTypingFieldContent(boolean saveSuggestions) {
       if (!typingField.getText().isEmpty()) {
          speeker.speek(Arrays.asList(typingField.getText()));
-         Suggestions.getInstance().addSuggestion(typingField.getText());
+         if (saveSuggestions) {
+            Suggestions.getInstance().addSuggestion(typingField.getText());
+         }
       }
       speakingArea.setText(speakingArea.getText() + "\n" + typingField.getText());
       speakingArea.setCaretPosition(speakingArea.getText().length());
@@ -356,9 +379,9 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
          expandedSize = new Dimension((int) expandedSize.getWidth(),
                expandedContentPaneHeight + (int) conentPaneHeight);
          if (PROPERTIES.isScreenCollapsed()) {
-            SwingUtilities.invokeLater(() -> collapse());
+            collapse();
          } else {
-            SwingUtilities.invokeLater(() -> expand());
+            expand();
          }
          firstTimeVisible = false;
       }
@@ -595,15 +618,10 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
                }
             }
          });
-      } catch (
-
-      NativeHookException ex)
-
-      {
+      } catch (NativeHookException ex) {
          log.warn("Unable to use native hook, disabling it");
          PROPERTIES.setNativeHookEnabled(false);
       }
-
    }
 
    private void setParsing(boolean parsing) {
