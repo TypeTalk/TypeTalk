@@ -99,6 +99,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    private int expandedContentPaneHeight = 415;
    private int collapsedContentPaneHeight = 55;
    private boolean firstTimeVisible = true;
+   private boolean speeking = false;
 
    private Speeker speeker;
 
@@ -130,10 +131,12 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    };
 
    private ActionListener playListener = al -> {
-      setParsing(true);
+      speeking = true;
+      updateGuiSpeekingState();
       List<String> speeches = Arrays.asList(speakingArea.getText().trim().split("\n"));
       if (speeches.size() < 1) {
-         setParsing(false);
+         speeking = false;
+         updateGuiSpeekingState();
          typingField.grabFocus();
       } else {
          speeker.speek(speeches);
@@ -142,7 +145,8 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
 
    private ActionListener stopListener = al -> {
       speeker.stopSpeeking();
-      setParsing(false);
+      speeking = false;
+      updateGuiSpeekingState();
    };
 
    private ActionListener saveListener = al -> {
@@ -173,7 +177,8 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    @Override
    public void endOfSpeech() {
       SwingUtilities.invokeLater(() -> {
-         setParsing(false);
+         speeking = false;
+         updateGuiSpeekingState();
          typingField.grabFocus();
       });
    }
@@ -219,7 +224,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       }
 
       ScreenPositioner.centerOnScreen(this);
-      addGlobalKeyAdapters(typingField, speakingArea, saveButton, playButton, collapseExpandButton);
+      addGlobalKeyAdapters(typingField, speakingArea, saveButton, playButton, stopButton, collapseExpandButton);
       popularPhrasesButtons.forEach(b -> addGlobalKeyAdapters(b));
    }
 
@@ -624,15 +629,15 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       }
    }
 
-   private void setParsing(boolean parsing) {
-      typingField.setEnabled(!parsing);
-      speakingArea.setEnabled(!parsing);
-      saveButton.setEnabled(!parsing);
-      playButton.setVisible(!parsing);
-      playMenuItem.setEnabled(!parsing);
-      stopButton.setVisible(parsing);
-      stopMenuItem.setEnabled(parsing);
-      if (parsing) {
+   private void updateGuiSpeekingState() {
+      typingField.setEnabled(!speeking);
+      speakingArea.setEnabled(!speeking);
+      saveButton.setEnabled(!speeking);
+      playButton.setVisible(!speeking);
+      playMenuItem.setEnabled(!speeking);
+      stopButton.setVisible(speeking);
+      stopMenuItem.setEnabled(speeking);
+      if (speeking) {
          parseTextButtonPanel.remove(playButton);
          parseTextButtonPanel.add(stopButton);
       } else {
@@ -650,7 +655,9 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       @Override
       public void keyPressed(KeyEvent e) {
          if (e.isControlDown()) {
-            if (e.getKeyCode() == KeyEvent.VK_P) {
+            if (e.getKeyCode() == KeyEvent.VK_P && speeking) {
+               stopListener.actionPerformed(null);
+            } else if (e.getKeyCode() == KeyEvent.VK_P && !speeking) {
                playListener.actionPerformed(null);
             } else if (e.getKeyCode() == KeyEvent.VK_S) {
                saveListener.actionPerformed(null);
