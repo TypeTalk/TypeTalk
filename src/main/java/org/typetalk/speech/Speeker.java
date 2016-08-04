@@ -52,6 +52,7 @@ public class Speeker {
    private boolean isLastWord;
    private AudioPlayer currentlySpeeking;
    private Set<EndOfSpeechListener> endOfSpeechListeners = new HashSet<>();
+   private Set<SpeechListener> speechListeners = new HashSet<>();
    private MaryInterface marytts;
 
    public Speeker() throws MaryConfigurationException {
@@ -84,7 +85,7 @@ public class Speeker {
                   isLastSentence = true;
                }
                if (speeking) {
-                  speek(speeches.get(i).trim().toLowerCase());
+                  speek(speeches.get(i));
                }
             }
          };
@@ -132,6 +133,10 @@ public class Speeker {
    public void addEndOfSpeechListener(EndOfSpeechListener listener) {
       endOfSpeechListeners.add(listener);
    }
+   
+   public void addSpeechListener(SpeechListener listener) {
+      speechListeners.add(listener);
+   }
 
    private void speek(String speech) {
       log.debug("Preparing to speek: " + speech);
@@ -171,9 +176,10 @@ public class Speeker {
    }
 
    private void executeSpeaking(String speech) throws SynthesisException, InterruptedException {
-      AudioInputStream audio = marytts.generateAudio(speech);
+      AudioInputStream audio = marytts.generateAudio(speech.trim());
       currentlySpeeking = new AudioPlayer(audio);
-      log.debug("Speeking: " + speech);
+      log.debug("Speeking: " + speech.trim());
+      notifySpeechListeners(speech.trim());
       currentlySpeeking.start();
       currentlySpeeking.join();
    }
@@ -185,8 +191,16 @@ public class Speeker {
    private void notifyEndOfSpeechListeners() {
       endOfSpeechListeners.stream().forEach(l -> l.endOfSpeech());
    }
+   
+   private void notifySpeechListeners(String speech) {
+      speechListeners.stream().forEach(l -> l.currentlySpeeking(speech));
+   }
 
    public interface EndOfSpeechListener {
       void endOfSpeech();
+   }
+   
+   public interface SpeechListener {
+      void currentlySpeeking(String speech);
    }
 }

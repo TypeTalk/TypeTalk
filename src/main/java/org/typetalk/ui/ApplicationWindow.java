@@ -29,6 +29,8 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
@@ -51,6 +53,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -75,6 +78,7 @@ import org.typetalk.TypeTalkProperties;
 import org.typetalk.data.Suggestions;
 import org.typetalk.speech.Speeker;
 import org.typetalk.speech.Speeker.EndOfSpeechListener;
+import org.typetalk.speech.Speeker.SpeechListener;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -89,7 +93,7 @@ import raging.goblin.swingutils.Icon;
 import raging.goblin.swingutils.ScreenPositioner;
 
 @Slf4j
-public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
+public class ApplicationWindow extends JFrame implements EndOfSpeechListener, SpeechListener {
 
    private static final Messages MESSAGES = Messages.getInstance();
    private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
@@ -106,7 +110,8 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    private JPanel expandedPanel;
    private JPanel collapsedPanel;
    private JTextField typingField;
-   private JScrollPane speakingPane;
+   private JLayeredPane speakingPane;
+   private JPanel glassPanel;
    private JTextArea speakingArea;
    private JButton saveButton;
    private JButton playButton;
@@ -133,12 +138,13 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    private ActionListener playListener = al -> {
       speeking = true;
       updateGuiSpeekingState();
-      List<String> speeches = Arrays.asList(speakingArea.getText().trim().split("\n"));
+      List<String> speeches = Arrays.asList(speakingArea.getText().split("\\."));
       if (speeches.size() < 1) {
          speeking = false;
          updateGuiSpeekingState();
          typingField.grabFocus();
       } else {
+         speakingArea.setCaretPosition(0);
          speeker.speek(speeches);
       }
    };
@@ -167,9 +173,10 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
       super(MESSAGES.get("client_window_title"));
       this.speeker = speeker;
       speeker.addEndOfSpeechListener(this);
+      speeker.addSpeechListener(this);
       setDefaultCloseOperation(EXIT_ON_CLOSE);
       if (PROPERTIES.isNativeHookEnabled()) {
-          initNativeHook();
+         initNativeHook();
       }
       initGui();
    }
@@ -184,6 +191,15 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    }
 
    @Override
+   public void currentlySpeeking(String speech) {
+      SwingUtilities.invokeLater(() -> {
+         int startIndex = speakingArea.getText().indexOf(speech);
+         speakingArea.setSelectionStart(startIndex);
+         speakingArea.setSelectionEnd(startIndex + speech.length());
+      });
+   }
+
+   @Override
    public void setVisible(boolean visible) {
       super.setVisible(visible);
       calculateScreenSize();
@@ -191,17 +207,17 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    }
 
    private void initGui() {
-      setIconImage(Icon.getIcon("/icons/sound.png").getImage());
-      setJMenuBar(createMenu());
-      Border padding = BorderFactory.createEmptyBorder(10, 10, 10, 10);
-      ((JComponent) getContentPane()).setBorder(padding);
-
       initSpeakingArea();
       initTypingField();
       initRightButtonPanel();
       initPopularPhrasesListeners();
       initPopularPhrasesButtonPanel();
       initCollapseExpandButton();
+
+      setIconImage(Icon.getIcon("/icons/sound.png").getImage());
+      setJMenuBar(createMenu());
+      Border padding = BorderFactory.createEmptyBorder(10, 10, 10, 10);
+      ((JComponent) getContentPane()).setBorder(padding);
 
       expandedPanel = new JPanel();
       expandedPanel.setLayout(new FormLayout(
@@ -230,10 +246,11 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
 
    private void initSpeakingArea() {
       speakingArea = new JTextArea();
+
       speakingArea.setWrapStyleWord(true);
       speakingArea.setLineWrap(true);
-      speakingPane = new JScrollPane(speakingArea);
-      speakingPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+      JScrollPane scrollPane = new JScrollPane(speakingArea);
+      scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
       speakingArea.addKeyListener(new KeyAdapter() {
 
          @Override
@@ -249,6 +266,45 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
          }
       });
       new EditAdapter(speakingArea);
+
+      speakingPane = new JLayeredPane();
+      speakingPane.add(scrollPane, new Integer(1));
+
+      glassPanel = new JPanel();
+      glassPanel.setOpaque(false);
+      glassPanel.addMouseListener(new MouseAdapter() {
+        
+         @Override
+         public void mousePressed(MouseEvent e) {
+            e.consume();
+         }
+
+         @Override
+         public void mouseClicked(MouseEvent e) {
+            e.consume();
+         }
+
+         @Override
+         public void mouseReleased(MouseEvent e) {
+            e.consume();
+         }
+
+         @Override
+         public void mouseDragged(MouseEvent e) {
+            e.consume();
+         }
+      });
+      speakingPane.add(glassPanel, new Integer(2));
+      glassPanel.setVisible(false);
+
+      speakingPane.addComponentListener(new ComponentAdapter() {
+
+         @Override
+         public void componentResized(ComponentEvent e) {
+            scrollPane.setBounds(0, 0, speakingPane.getWidth(), speakingPane.getHeight());
+            glassPanel.setBounds(0, 0, speakingPane.getWidth(), speakingPane.getHeight());
+         }
+      });
    }
 
    private void initRightButtonPanel() {
@@ -383,6 +439,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
                collapsedContentPaneHeight + (int) conentPaneHeight);
          expandedSize = new Dimension((int) expandedSize.getWidth(),
                expandedContentPaneHeight + (int) conentPaneHeight);
+         pack();
          if (PROPERTIES.isScreenCollapsed()) {
             collapse();
          } else {
@@ -630,8 +687,9 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
    }
 
    private void updateGuiSpeekingState() {
+      glassPanel.setVisible(speeking);
       typingField.setEnabled(!speeking);
-      speakingArea.setEnabled(!speeking);
+      speakingArea.setEditable(!speeking);
       saveButton.setEnabled(!speeking);
       playButton.setVisible(!speeking);
       playMenuItem.setEnabled(!speeking);
@@ -644,6 +702,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener {
          parseTextButtonPanel.add(playButton);
          parseTextButtonPanel.remove(stopButton);
       }
+      popularPhrasesButtons.forEach(b -> b.setEnabled(!speeking));
    }
 
    private void addGlobalKeyAdapters(Component... components) {
