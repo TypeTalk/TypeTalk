@@ -19,6 +19,7 @@
 
 package org.typetalk.ui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -114,6 +115,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
    private JLayeredPane speakingPane;
    private JPanel glassPanel;
    private JTextArea speakingArea;
+   private Color speakingAreaDisabledColor;
    private JButton saveButton;
    private JButton playButton;
    private JMenuItem playMenuItem;
@@ -241,6 +243,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
 
    private void initSpeakingArea() {
       speakingArea = new JTextArea();
+      speakingAreaDisabledColor = speakingArea.getBackground();
 
       speakingArea.setWrapStyleWord(true);
       speakingArea.setLineWrap(true);
@@ -681,7 +684,9 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
       if (speeking) {
          parseTextButtonPanel.remove(playButton);
          parseTextButtonPanel.add(stopButton);
+         speakingArea.setBackground(new Color(speakingAreaDisabledColor.getRGB()));
       } else {
+         speakingArea.setBackground(Color.WHITE);
          parseTextButtonPanel.add(playButton);
          parseTextButtonPanel.remove(stopButton);
       }
