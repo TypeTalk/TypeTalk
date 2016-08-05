@@ -141,7 +141,8 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
    private ActionListener playListener = al -> {
       speeking = true;
       updateGuiSpeekingState();
-      List<String> speeches = Arrays.asList(speakingArea.getText().split("\\."));
+      List<String> speeches = Arrays.asList(speakingArea.getText().split("\\.\\s"));
+      speeches = speeches.stream().filter(s -> !s.trim().equals("")).collect(Collectors.toList());
       if (speeches.size() < 1) {
          speeking = false;
          updateGuiSpeekingState();
