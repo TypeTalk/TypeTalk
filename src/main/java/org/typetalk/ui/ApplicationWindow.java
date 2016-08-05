@@ -37,6 +37,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -102,7 +104,6 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
    private Dimension collapsedSize = new Dimension(600, 80);
    private int expandedContentPaneHeight = 415;
    private int collapsedContentPaneHeight = 55;
-   private boolean firstTimeVisible = true;
    private boolean speeking = false;
 
    private Speeker speeker;
@@ -179,6 +180,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
          initNativeHook();
       }
       initGui();
+      addWindowListener(new WindowOpenedListener());
    }
 
    @Override
@@ -197,13 +199,6 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
          speakingArea.setSelectionStart(startIndex);
          speakingArea.setSelectionEnd(startIndex + speech.length());
       });
-   }
-
-   @Override
-   public void setVisible(boolean visible) {
-      super.setVisible(visible);
-      calculateScreenSize();
-      typingField.grabFocus();
    }
 
    private void initGui() {
@@ -233,15 +228,15 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
             new FormLayout(new ColumnSpec[] { ColumnSpec.decode("default:grow"), FormFactory.RELATED_GAP_COLSPEC,
                   ColumnSpec.decode("50px") }, new RowSpec[] { FormFactory.DEFAULT_ROWSPEC }));
 
+      addGlobalKeyAdapters(typingField, speakingArea, saveButton, playButton, stopButton, collapseExpandButton);
+      popularPhrasesButtons.forEach(b -> addGlobalKeyAdapters(b));
+
       if (PROPERTIES.isScreenCollapsed()) {
          collapse();
       } else {
          expand();
       }
-
       ScreenPositioner.centerOnScreen(this);
-      addGlobalKeyAdapters(typingField, speakingArea, saveButton, playButton, stopButton, collapseExpandButton);
-      popularPhrasesButtons.forEach(b -> addGlobalKeyAdapters(b));
    }
 
    private void initSpeakingArea() {
@@ -273,7 +268,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
       glassPanel = new JPanel();
       glassPanel.setOpaque(false);
       glassPanel.addMouseListener(new MouseAdapter() {
-        
+
          @Override
          public void mousePressed(MouseEvent e) {
             e.consume();
@@ -297,6 +292,8 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
       speakingPane.add(glassPanel, new Integer(2));
       glassPanel.setVisible(false);
 
+      scrollPane.setBounds(0, 0, speakingPane.getWidth(), speakingPane.getHeight());
+      glassPanel.setBounds(0, 0, speakingPane.getWidth(), speakingPane.getHeight());
       speakingPane.addComponentListener(new ComponentAdapter() {
 
          @Override
@@ -428,25 +425,11 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
    }
 
    private void calculateScreenSize() {
-      if (firstTimeVisible) {
-         try {
-            Thread.sleep(500);
-         } catch (InterruptedException e1) {
-            log.error("Calculate screen interrupted");
-         }
-         double conentPaneHeight = getSize().getHeight() - getContentPane().getSize().getHeight();
-         collapsedSize = new Dimension((int) collapsedSize.getWidth(),
-               collapsedContentPaneHeight + (int) conentPaneHeight);
-         expandedSize = new Dimension((int) expandedSize.getWidth(),
-               expandedContentPaneHeight + (int) conentPaneHeight);
-         pack();
-         if (PROPERTIES.isScreenCollapsed()) {
-            collapse();
-         } else {
-            expand();
-         }
-         firstTimeVisible = false;
-      }
+      double windowBorderHeight = getSize().getHeight() - getContentPane().getSize().getHeight();
+      collapsedSize = new Dimension((int) collapsedSize.getWidth(),
+            collapsedContentPaneHeight + (int) windowBorderHeight + 1);
+      expandedSize = new Dimension((int) expandedSize.getWidth(),
+            expandedContentPaneHeight + (int) windowBorderHeight + 1);
    }
 
    private void collapse() {
@@ -845,6 +828,29 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
       @Override
       public String getDescription() {
          return MESSAGES.get("txt");
+      }
+   }
+
+   private class WindowOpenedListener extends WindowAdapter {
+
+      @Override
+      public void windowOpened(WindowEvent e) {
+         new Thread() {
+            @Override
+            public void run() {
+               try {
+                  Thread.sleep(100);
+               } catch (InterruptedException e) {
+                  log.warn("Sleep for recalculating screensize interrupted");
+               }
+               calculateScreenSize();
+               if (PROPERTIES.isScreenCollapsed()) {
+                  setSize(collapsedSize);
+               } else {
+                  setSize(expandedSize);
+               }
+            };
+         }.start();
       }
    }
 }
