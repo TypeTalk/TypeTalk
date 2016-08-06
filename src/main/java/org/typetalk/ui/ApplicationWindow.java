@@ -106,7 +106,8 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
    private int expandedContentPaneHeight = 415;
    private int collapsedContentPaneHeight = 55;
    private boolean speeking = false;
-
+   private int currentlySpeekingIndex;
+      
    private Speeker speeker;
 
    private JPanel expandedPanel;
@@ -140,6 +141,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
 
    private ActionListener playListener = al -> {
       speeking = true;
+      currentlySpeekingIndex = 0;
       updateGuiSpeekingState();
       List<String> speeches = Arrays.asList(speakingArea.getText().split("\\.\\s"));
       speeches = speeches.stream().filter(s -> !s.trim().equals("")).collect(Collectors.toList());
@@ -191,6 +193,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
       SwingUtilities.invokeLater(() -> {
          speeking = false;
          updateGuiSpeekingState();
+         speakingArea.setCaretPosition(speakingArea.getText().length());
          typingField.grabFocus();
       });
    }
@@ -198,9 +201,10 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
    @Override
    public void currentlySpeeking(String speech) {
       SwingUtilities.invokeLater(() -> {
-         int startIndex = speakingArea.getText().indexOf(speech);
+         int startIndex = speakingArea.getText().indexOf(speech, currentlySpeekingIndex);
          speakingArea.setSelectionStart(startIndex);
          speakingArea.setSelectionEnd(startIndex + speech.length());
+         currentlySpeekingIndex = startIndex + speech.length();
       });
    }
 
