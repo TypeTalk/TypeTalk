@@ -20,7 +20,7 @@
 	</appender>
 
 	<logger additivity="false" name="org.typetalk">
-		<level value="DEBUG" />
+		<level value="WARN" />
 		<appender-ref ref="file" />
 	</logger>
 

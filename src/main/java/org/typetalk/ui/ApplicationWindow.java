@@ -32,6 +32,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
@@ -70,6 +71,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 
 import org.jnativehook.GlobalScreen;
@@ -107,7 +109,8 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
    private int collapsedContentPaneHeight = 55;
    private boolean speeking = false;
    private int currentlySpeekingIndex;
-      
+   private Component lastFocussedTextElement;
+
    private Speeker speeker;
 
    private JPanel expandedPanel;
@@ -143,7 +146,30 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
       speeking = true;
       currentlySpeekingIndex = 0;
       updateGuiSpeekingState();
-      List<String> speeches = Arrays.asList(speakingArea.getText().split("\\.\\s"));
+
+      int searchFromPosition = speakingArea.getCaretPosition();
+      try {
+         while (searchFromPosition >= 0) {
+            if (speakingArea.getText(searchFromPosition, 1).equals(" ")) {
+               break;
+            } else {
+               searchFromPosition--;
+            }
+         }
+      } catch (BadLocationException e) {
+         log.warn("Could not find space before caret postion", e);
+      }
+
+      String text = speakingArea.getText();
+      if (speakingArea.equals(lastFocussedTextElement)) {
+         try {
+            text = speakingArea.getText(searchFromPosition, speakingArea.getText().length() - searchFromPosition);
+         } catch (BadLocationException e) {
+            log.warn("Could get shorter part of texarea, speaking complete text", e);
+         }
+      }
+
+      List<String> speeches = Arrays.asList(text.split("\\.\\s"));
       speeches = speeches.stream().filter(s -> !s.trim().equals("")).collect(Collectors.toList());
       if (speeches.size() < 1) {
          speeking = false;
@@ -268,6 +294,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
             }
          }
       });
+      speakingArea.addFocusListener(new LastFocusListener());
       new EditAdapter(speakingArea);
 
       speakingPane = new JLayeredPane();
@@ -377,6 +404,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
 
    private void initTypingField() {
       typingField = PROPERTIES.isSuggestionsEnabled() ? createSuggestField() : createTextField();
+      typingField.addFocusListener(new LastFocusListener());
    }
 
    private JTextField createTextField() {
@@ -700,6 +728,14 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
 
    private void addGlobalKeyAdapters(Component... components) {
       Arrays.stream(components).forEach(c -> c.addKeyListener(new ShortCutsAdapter()));
+   }
+   
+   private class LastFocusListener extends FocusAdapter {
+      
+      @Override
+      public void focusLost(FocusEvent e) {
+         lastFocussedTextElement = e.getComponent();
+      }
    }
 
    private class ShortCutsAdapter extends KeyAdapter {
