@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<marytts-install xmlns="http://mary.dfki.de/installer">
+    <voice gender="female" locale="en-GB" name="dfki-prudence-hsmm"
+        type="hsmm" version="5.2">
+        <description>A female British English hidden semi-Markov model voice</description>
+        <license href="http://mary.dfki.de/download/by-nd-3.0.html"/>
+        <package filename="voice-dfki-prudence-hsmm-5.2.zip"
+            md5sum="6b3c9671e2af78c1e1839cd57ee1063b" size="1559757">
+            <location folder="true" href="http://mary.dfki.de/download/5.2/"/>
+            <location folder="true" href="https://github.com/marytts/voice-dfki-prudence-hsmm/releases/download/v5.2/"/>
+        </package>
+        <files>lib/voice-dfki-prudence-hsmm-5.2.jar</files>
+        <depends language="en-GB" version="5.2"/>
+    </voice>
+</marytts-install>

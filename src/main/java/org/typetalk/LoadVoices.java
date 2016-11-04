@@ -37,7 +37,7 @@ public class LoadVoices {
       StringBuilder dependencies = new StringBuilder();
 
       for (String voiceFileName : voices) {
-         String artifactId = voiceFileName.replaceAll("-5.1.2.jar", "").replaceAll("-5.1.jar", "");
+         String artifactId = voiceFileName.replaceAll("-5.2.jar", "");
 
          Pattern versionPattern = Pattern.compile("\\d.*.jar");
          Matcher versionMatcher = versionPattern.matcher(voiceFileName);

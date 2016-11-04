@@ -62,10 +62,10 @@ public class Voice {
    private static final List<Voice> VOICES = new ArrayList<>();
    private static final Preferences PREFERENCES = Preferences.userNodeForPackage(Voice.class);
    private static final String XML_DIR = "/voices/";
-   private static final List<String> XML_FILES = Arrays.asList("voice-dfki-obadiah-hsmm-5.1-component.xml",
-         "voice-dfki-spike-hsmm-5.1-component.xml", "voice-cmu-slt-hsmm-5.1.2-component.xml",
-         "voice-dfki-prudence-hsmm-5.1-component.xml", "voice-cmu-bdl-hsmm-5.1-component.xml",
-         "voice-dfki-poppy-hsmm-5.1-component.xml", "voice-cmu-rms-hsmm-5.1-component.xml");
+   private static final List<String> XML_FILES = Arrays.asList("voice-dfki-prudence-hsmm-5.2-component.xml",
+         "voice-dfki-obadiah-hsmm-5.2-component.xml", "voice-cmu-rms-hsmm-5.2-component.xml",
+         "voice-dfki-spike-hsmm-5.2-component.xml", "voice-dfki-poppy-hsmm-5.2-component.xml",
+         "voice-cmu-bdl-hsmm-5.2-component.xml", "voice-cmu-slt-hsmm-5.2-component.xml");
    private static final String DEFAULT_VOICE = "dfki-obadiah-hsmm";
 
    @Getter
