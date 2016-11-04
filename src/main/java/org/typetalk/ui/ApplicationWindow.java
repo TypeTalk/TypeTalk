@@ -150,7 +150,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
       int searchFromPosition = speakingArea.getCaretPosition();
       try {
          while (searchFromPosition >= 0) {
-            if (speakingArea.getText(searchFromPosition, 1).equals(" ")) {
+            if (speakingArea.getText(searchFromPosition, 1).equals(" ") || speakingArea.getText(searchFromPosition, 1).equals("\n")) {
                break;
             } else {
                searchFromPosition--;
