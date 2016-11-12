@@ -93,6 +93,7 @@ import com.jgoodies.forms.layout.RowSpec;
 import fr.pud.client.view.jsuggestfield.JSuggestField;
 import lombok.extern.slf4j.Slf4j;
 import marytts.exceptions.MaryConfigurationException;
+import raging.goblin.swingutils.AboutWindow;
 import raging.goblin.swingutils.HelpBrowser;
 import raging.goblin.swingutils.Icon;
 import raging.goblin.swingutils.ScreenPositioner;
@@ -150,7 +151,8 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
       int searchFromPosition = speakingArea.getCaretPosition();
       try {
          while (searchFromPosition >= 0) {
-            if (speakingArea.getText(searchFromPosition, 1).equals(" ") || speakingArea.getText(searchFromPosition, 1).equals("\n")) {
+            if (speakingArea.getText(searchFromPosition, 1).equals(" ")
+                  || speakingArea.getText(searchFromPosition, 1).equals("\n")) {
                break;
             } else {
                searchFromPosition--;
@@ -652,7 +654,10 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
 
       JMenuItem aboutItem = new JMenuItem(MESSAGES.get("about"), Icon.getIcon("/icons/star.png"));
       aboutItem.setMnemonic(KeyEvent.VK_A);
-      aboutItem.addActionListener(a -> new AboutDialog(ApplicationWindow.this).setVisible(true));
+      aboutItem.addActionListener(a -> new AboutWindow(ApplicationWindow.this, MESSAGES.get("client_window_title"),
+            "/icons/sound.png", MESSAGES.get("version_text"), MESSAGES.get("url_text"), MESSAGES.get("about_text"),
+            MESSAGES.get("license_text"))
+                  .setVisible(true));
       helpMenu.add(aboutItem);
 
       return menuBar;
@@ -729,9 +734,9 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
    private void addGlobalKeyAdapters(Component... components) {
       Arrays.stream(components).forEach(c -> c.addKeyListener(new ShortCutsAdapter()));
    }
-   
+
    private class LastFocusListener extends FocusAdapter {
-      
+
       @Override
       public void focusLost(FocusEvent e) {
          lastFocussedTextElement = e.getComponent();
