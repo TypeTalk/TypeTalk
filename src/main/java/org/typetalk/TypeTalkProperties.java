@@ -36,7 +36,7 @@ public class TypeTalkProperties implements Properties {
    public static final int DEFAULT_DOUBLE_CLICK_DELAY = 250;
    public static final int DEFAULT_TOAST_TIME = 3000;
    public static final String DEFAULT_SETTINGS_DIRECTORY = ".typetalk";
-   public static final String DEFAULT_POPULAR_PHRASES = "Yes,No,Yes please,No thanks,Ok,Fine,Hello,Goodbye,Thank you";
+   public static final String DEFAULT_POPULAR_PHRASES = "Yes.,No.,Yes please.,No thanks.,Ok.,Fine.,Hello.,Goodbye.,Thank you.";
    public static final boolean DEFAULT_SUGGESTIONS_ENABLED = true; 
 
    private static final String KEY_LANGUAGE = "language";
