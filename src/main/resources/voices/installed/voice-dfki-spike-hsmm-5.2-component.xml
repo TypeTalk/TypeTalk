@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<marytts-install xmlns="http://mary.dfki.de/installer">
+    <voice gender="male" locale="en-GB" name="dfki-spike-hsmm"
+        type="hsmm" version="5.2">
+        <description>A male British English hidden semi-Markov model voice</description>
+        <license href="http://mary.dfki.de/download/by-nd-3.0.html"/>
+        <package filename="voice-dfki-spike-hsmm-5.2.zip"
+            md5sum="c1438f479770400eed8c081107e376ca" size="1082784">
+            <location folder="true" href="http://mary.dfki.de/download/5.2/"/>
+            <location folder="true" href="https://github.com/marytts/voice-dfki-spike-hsmm/releases/download/v5.2/"/>
+        </package>
+        <files>lib/voice-dfki-spike-hsmm-5.2.jar</files>
+        <depends language="en-GB" version="5.2"/>
+    </voice>
+</marytts-install>

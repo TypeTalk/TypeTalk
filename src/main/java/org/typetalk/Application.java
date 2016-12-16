@@ -22,9 +22,13 @@ package org.typetalk;
 import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Locale;
 
 import javax.swing.JOptionPane;
@@ -49,14 +53,17 @@ import raging.goblin.swingutils.SwingUtils;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Application {
 
+   public static final String DOWNLOAD_DIR = "download";
+   public static final String INSTALLATION_DIR = "installed";
+   public static final String LIB_DIR = "lib";
+
    private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
    private static final Messages MESSAGES = Messages.getInstance();
-   
+
    private static ApplicationWindow applicationWindow;
 
    public static void main(String[] args) {
       checkSingleInstance();
-      initDataFolder();
       SwingUtils.initAntiAliasing();
       SwingUtils.disablePaintSliderValue();
       SwingUtils.loadLaf(args, PROPERTIES);
@@ -65,6 +72,14 @@ public final class Application {
       SplashScreen splashScreen = new SplashScreen("TypeTalk", "/icons/sound.png");
       ScreenPositioner.centerOnScreen(splashScreen);
       splashScreen.setVisible(PROPERTIES.isSplashScreenEnabled());
+
+      try {
+         initDataFolder();
+         initDefaultLanguagesAndVoices();
+      } catch (IOException | URISyntaxException e) {
+         log.error("Initialization error, unable to start TypeTalk", e);
+         splashScreen.setMessage(MESSAGES.get("initialization_error"));
+      }
 
       try {
          Speeker speeker = new Speeker();
@@ -100,30 +115,51 @@ public final class Application {
       }
       ApplicationInstanceManager.setSubListener(() -> {
          log.warn("The user tried to start the application twice");
-         JOptionPane.showMessageDialog(applicationWindow, MESSAGES.get("single_instance"),
-               MESSAGES.get("error"), JOptionPane.ERROR_MESSAGE);
+         JOptionPane.showMessageDialog(applicationWindow, MESSAGES.get("single_instance"), MESSAGES.get("error"),
+               JOptionPane.ERROR_MESSAGE);
       });
    }
 
-   private static void initDataFolder() {
-      try {
-         String configuredSettingsDirectory = PROPERTIES.getSettingsDirectory();
-         if (configuredSettingsDirectory.equals(TypeTalkProperties.DEFAULT_SETTINGS_DIRECTORY)) {
-            Path homeDirectory = Paths.get(System.getProperty("user.home")).normalize().toAbsolutePath();
-            configuredSettingsDirectory = homeDirectory.toString() + File.separator
-                  + TypeTalkProperties.DEFAULT_SETTINGS_DIRECTORY;
-            PROPERTIES.setSettingsDirectory(configuredSettingsDirectory);
-         }
-         Path settingsDirectory = Paths.get(PROPERTIES.getSettingsDirectory());
-         if (!Files.exists(settingsDirectory)) {
-            Files.createDirectories(settingsDirectory);
-         } else if (!settingsDirectory.toFile().isDirectory()) {
-            PROPERTIES.setSettingsDirectory(PROPERTIES.getSettingsDirectory() + "_dir");
-            Files.createDirectories(Paths.get(PROPERTIES.getSettingsDirectory()));
-         }
-      } catch (IOException e) {
-         log.error("Unable to initialize settings directory");
+   private static void initDataFolder() throws IOException {
+      String configuredSettingsDirectory = PROPERTIES.getSettingsDirectory();
+      if (configuredSettingsDirectory.equals(TypeTalkProperties.DEFAULT_SETTINGS_DIRECTORY)) {
+         Path homeDirectory = Paths.get(System.getProperty("user.home")).normalize().toAbsolutePath();
+         configuredSettingsDirectory = homeDirectory.toString() + File.separator
+               + TypeTalkProperties.DEFAULT_SETTINGS_DIRECTORY;
+         PROPERTIES.setSettingsDirectory(configuredSettingsDirectory);
       }
+      Path settingsDirectory = Paths.get(PROPERTIES.getSettingsDirectory());
+      if (!Files.exists(settingsDirectory)) {
+         Files.createDirectories(settingsDirectory);
+      } else if (!settingsDirectory.toFile().isDirectory()) {
+         PROPERTIES.setSettingsDirectory(PROPERTIES.getSettingsDirectory() + "_dir");
+         Files.createDirectories(Paths.get(PROPERTIES.getSettingsDirectory()));
+      }
+   }
+
+   private static void initDefaultLanguagesAndVoices() throws IOException, URISyntaxException {
+      Path installationDir = Paths.get(PROPERTIES.getSettingsDirectory() + File.separator + INSTALLATION_DIR);
+      Files.createDirectories(installationDir);
+      Path libDir = Paths.get(PROPERTIES.getSettingsDirectory() + File.separator + LIB_DIR);
+      Files.createDirectories(libDir);
+      Path downloadDir = Paths.get(PROPERTIES.getSettingsDirectory() + File.separator + DOWNLOAD_DIR);
+      Files.createDirectories(downloadDir);
+
+      copyResourcesToFileSystem(Paths.get(Application.class.getResource("/voices/" + INSTALLATION_DIR).toURI()),
+            installationDir);
+      copyResourcesToFileSystem(Paths.get(Application.class.getResource("/voices/" + LIB_DIR).toURI()), libDir);
+   }
+
+   private static void copyResourcesToFileSystem(Path resourcePath, Path fileSystemPath) throws IOException {
+      Files.walkFileTree(resourcePath, new SimpleFileVisitor<Path>() {
+         @Override
+         public FileVisitResult visitFile(Path resourceFile, BasicFileAttributes attrs) throws IOException {
+            if (!fileSystemPath.resolve(resourceFile.getFileName()).toFile().exists()) {
+               Files.copy(resourceFile, fileSystemPath.resolve(resourceFile.getFileName()));
+            }
+            return FileVisitResult.CONTINUE;
+         }
+      });
    }
 
    private static void setLocale() {
