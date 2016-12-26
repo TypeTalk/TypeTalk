@@ -36,6 +36,7 @@ import javax.swing.JOptionPane;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.typetalk.speech.Speeker;
+import org.typetalk.speech.Voice;
 import org.typetalk.ui.ApplicationWindow;
 import org.typetalk.ui.WelcomeScreen;
 
@@ -107,6 +108,13 @@ public final class Application {
          System.exit(0);
       }
    }
+   
+   private static void loadLanguagesAndVoices() {
+      
+      for (Voice voide : Voice.getAllVoices()) {
+         
+      }
+   }
 
    private static void checkSingleInstance() {
       if (!ApplicationInstanceManager.registerInstance()) {
@@ -165,7 +173,7 @@ public final class Application {
    private static void setLocale() {
       String language = PROPERTIES.getLocaleLanguage();
       String country = PROPERTIES.getLocaleCountry();
-      log.debug(String.format("Setting locale to: %s/%s", language, country));
+      log.debug("Setting locale to: {}/{}", language, country);
       Locale.setDefault(new Locale(language, country));
    }
 

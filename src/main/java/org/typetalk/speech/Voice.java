@@ -75,6 +75,8 @@ public class Voice {
    private Gender gender;
    private String language;
    private String country;
+   @Getter
+   private String voiceJarFile;
 
    public static List<Voice> getAllVoices() {
       if (VOICES.isEmpty()) {
@@ -103,15 +105,11 @@ public class Voice {
    }
 
    private static List<Voice> readAllVoices() {
-      File installationDir = new File(PROPERTIES.getSettingsDirectory() + File.separator + Application.INSTALLATION_DIR);
-      List<File> voiceFiles = Arrays.asList(installationDir.listFiles())
-            .stream()
-            .filter(f -> f.getName().startsWith("voice"))
-            .collect(Collectors.toList());
-      return voiceFiles.stream()
-            .map(f -> readFromXml(f))
-            .filter(v -> v != null)
-            .collect(Collectors.toList());
+      File installationDir = new File(
+            PROPERTIES.getSettingsDirectory() + File.separator + Application.INSTALLATION_DIR);
+      List<File> voiceFiles = Arrays.asList(installationDir.listFiles()).stream()
+            .filter(f -> f.getName().startsWith("voice")).collect(Collectors.toList());
+      return voiceFiles.stream().map(f -> readFromXml(f)).filter(v -> v != null).collect(Collectors.toList());
    }
 
    private static Voice readFromXml(File xmlFile) {
@@ -130,11 +128,21 @@ public class Voice {
             String genderText = ((Element) voice).getAttribute("gender");
             String localeText = ((Element) voice).getAttribute("locale");
             Locale locale = new Locale(localeText.split("-")[0], localeText.split("-")[1]);
-            return new Voice(name, descriptionText, Gender.valueOf(genderText.toUpperCase()),
-                  locale.getDisplayLanguage(), locale.getDisplayCountry());
+            String voiceJarFile = null;
+
+            for (int i = 0; i < voice.getChildNodes().getLength(); i++) {
+               if (voice.getChildNodes().item(i).getNodeName().equals("files")) {
+                  voiceJarFile = voice.getChildNodes().item(i).getNodeValue();
+               }
+            }
+
+            if (voiceJarFile != null) {
+               return new Voice(name, descriptionText, Gender.valueOf(genderText.toUpperCase()),
+                     locale.getDisplayLanguage(), locale.getDisplayCountry(), voiceJarFile);
+            }
 
          } else {
-            log.error("No <voice> or <description> element in xml file: " + xmlFile.getName());
+            log.error("No <voice>, <description> or <files> element in xml file: " + xmlFile.getName());
          }
 
       } catch (SAXException | IOException | ParserConfigurationException e) {
@@ -147,16 +155,12 @@ public class Voice {
    private static Voice getVoice(String name) {
       try {
 
-         return getAllVoices()
-               .stream()
-               .filter(v -> v.getName().equals(name))
-               .collect(Collectors.toList())
-               .get(0);
+         return getAllVoices().stream().filter(v -> v.getName().equals(name)).collect(Collectors.toList()).get(0);
 
       } catch (IndexOutOfBoundsException e) {
          log.error("No voices found");
       }
-      
+
       return null;
    }
 }
