@@ -35,6 +35,7 @@ import javax.swing.JOptionPane;
 
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
+import org.typetalk.speech.Language;
 import org.typetalk.speech.Speeker;
 import org.typetalk.speech.Voice;
 import org.typetalk.ui.ApplicationWindow;
@@ -75,11 +76,22 @@ public final class Application {
       splashScreen.setVisible(PROPERTIES.isSplashScreenEnabled());
 
       try {
+
          initDataFolder();
          initDefaultLanguagesAndVoices();
-      } catch (IOException | URISyntaxException e) {
+         loadLanguagesAndVoices();
+
+      } catch (IOException | URISyntaxException | SecurityException | IllegalArgumentException e) {
+
          log.error("Initialization error, unable to start TypeTalk", e);
          splashScreen.setMessage(MESSAGES.get("initialization_error"));
+         try {
+            Thread.sleep(3000);
+         } catch (InterruptedException ex) {
+            log.error("Sleep interrupted", ex);
+         } finally {
+            System.exit(100);
+         }
       }
 
       try {
@@ -101,19 +113,17 @@ public final class Application {
          log.error("Unable to start Speeker", e);
          splashScreen.setMessage(MESSAGES.get("initialization_error"));
          try {
-            Thread.sleep(5000);
+            Thread.sleep(3000);
          } catch (InterruptedException e1) {
             log.error(e.getMessage(), e);
          }
          System.exit(0);
       }
    }
-   
+
    private static void loadLanguagesAndVoices() {
-      
-      for (Voice voide : Voice.getAllVoices()) {
-         
-      }
+      Language.loadLanguages();
+      Voice.loadVoices();
    }
 
    private static void checkSingleInstance() {

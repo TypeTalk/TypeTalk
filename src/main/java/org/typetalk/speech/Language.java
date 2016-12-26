@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
@@ -34,7 +33,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.typetalk.Application;
-import org.typetalk.Messages;
 import org.typetalk.TypeTalkProperties;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -48,111 +46,90 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class Voice {
+public class Language {
 
-   @AllArgsConstructor
-   public enum Gender {
-
-      MALE(Messages.getInstance().get("male")), FEMALE(Messages.getInstance().get("female"));
-
-      private String displayName;
-
-      @Override
-      public String toString() {
-         return displayName;
-      }
-   };
-
-   private static final List<Voice> VOICES = new ArrayList<>();
-   private static final Preferences PREFERENCES = Preferences.userNodeForPackage(Voice.class);
+   private static final List<Language> LANGUAGES = new ArrayList<>();
+   private static final Preferences PREFERENCES = Preferences.userNodeForPackage(Language.class);
    private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
-   private static final String DEFAULT_VOICE = "dfki-obadiah-hsmm";
+   private static final String DEFAULT_LANGUAGE = "en";
 
    @Getter
    private String name;
    @Getter
    private String description;
-   private Gender gender;
-   private String language;
-   private String country;
    @Getter
-   private String voiceJarFile;
+   private String languageJarFile;
 
-   public static List<Voice> getAllVoices() {
-      if (VOICES.isEmpty()) {
-         loadVoices();
+   public static List<Language> getAllLanguages() {
+      if (LANGUAGES.isEmpty()) {
+         loadLanguages();
       }
-      return VOICES;
+      return LANGUAGES;
    }
 
-   public static void loadVoices() {
-      VOICES.addAll(readAllVoices());
+   public static void loadLanguages() {
+      LANGUAGES.addAll(readAllLanguages());
    }
 
-   public static Voice getSelectedVoice() {
-      String name = PREFERENCES.get("voice", DEFAULT_VOICE);
-      return getVoice(name);
+   public static Language getSelectedLanguage() {
+      String name = PREFERENCES.get("language", DEFAULT_LANGUAGE);
+      return getLanguage(name);
    }
 
-   public static void setSelectedVoice(String voice) {
-      PREFERENCES.put("voice", voice);
+   public static void setSelectedLanguage(String language) {
+      PREFERENCES.put("language", language);
    }
 
-   public static Voice getDefaultVoice() {
-      return getVoice(DEFAULT_VOICE);
+   public static Language getDefaultLanguage() {
+      return getLanguage(DEFAULT_LANGUAGE);
    }
 
    @Override
    public String toString() {
-      return Character.toUpperCase(name.charAt(0)) + name.substring(1) + " (" + gender + ", " + language + " - "
-            + country + ")";
+      return name.toUpperCase();
    }
 
-   private static List<Voice> readAllVoices() {
+   private static List<Language> readAllLanguages() {
       File installationDir = new File(
             PROPERTIES.getSettingsDirectory() + File.separator + Application.INSTALLATION_DIR);
-      List<File> voiceFiles = Arrays.asList(installationDir.listFiles()).stream()
-            .filter(f -> f.getName().startsWith("voice")).collect(Collectors.toList());
-      return voiceFiles.stream().map(f -> readFromXml(f)).filter(v -> v != null).collect(Collectors.toList());
+      List<File> languagesFiles = Arrays.asList(installationDir.listFiles()).stream()
+            .filter(f -> f.getName().startsWith("marytts-lang")).collect(Collectors.toList());
+      return languagesFiles.stream().map(f -> readFromXml(f)).filter(v -> v != null).collect(Collectors.toList());
    }
 
-   private static Voice readFromXml(File xmlFile) {
+   private static Language readFromXml(File xmlFile) {
       try {
          InputStream xmlStream = new FileInputStream(xmlFile);
          Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlStream);
          document.getDocumentElement().normalize();
-         Node voice = document.getElementsByTagName("voice").item(0);
+         Node language = document.getElementsByTagName("language").item(0);
          Node description = document.getElementsByTagName("description").item(0);
          Node files = document.getElementsByTagName("files").item(0);
 
-         if (voice != null && voice.getNodeType() == Node.ELEMENT_NODE && description != null
+         if (language != null && language.getNodeType() == Node.ELEMENT_NODE && description != null
                && description.getNodeType() == Node.ELEMENT_NODE) {
 
-            String name = ((Element) voice).getAttribute("name");
+            String name = ((Element) language).getAttribute("name");
             String descriptionText = ((Element) description).getTextContent();
-            String genderText = ((Element) voice).getAttribute("gender");
-            String localeText = ((Element) voice).getAttribute("locale");
-            Locale locale = new Locale(localeText.split("-")[0], localeText.split("-")[1]);
             String voiceJarFile = ((Element) files).getTextContent();
 
-            return new Voice(name, descriptionText, Gender.valueOf(genderText.toUpperCase()),
-                     locale.getDisplayLanguage(), locale.getDisplayCountry(), voiceJarFile);
+            return new Language(name, descriptionText, voiceJarFile);
 
          } else {
-            log.error("No <voice>, <description> or <files> element in xml file: " + xmlFile.getName());
+            log.error("No <language>, <description> or <files> element in xml file: " + xmlFile.getName());
          }
 
       } catch (SAXException | IOException | ParserConfigurationException e) {
-         log.error("Not able to parse xml to voice, file: " + xmlFile.getName(), e);
+         log.error("Not able to parse xml to language, file: " + xmlFile.getName(), e);
       }
 
       return null;
    }
 
-   private static Voice getVoice(String name) {
+   private static Language getLanguage(String name) {
       try {
 
-         return getAllVoices().stream().filter(v -> v.getName().equals(name)).collect(Collectors.toList()).get(0);
+         return getAllLanguages().stream().filter(v -> v.getName().equals(name)).collect(Collectors.toList()).get(0);
 
       } catch (IndexOutOfBoundsException e) {
          log.error("No voices found");

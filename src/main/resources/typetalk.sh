@@ -2,4 +2,4 @@
 
 cd /opt/typetalk
 
-java -jar lib/TypeTalk.one-jar.jar
+java -cp "~/.typetalk/lib/*" -Dmary.base="~/typetalk" -jar lib/TypeTalk.one-jar.jar
