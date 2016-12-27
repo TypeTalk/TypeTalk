@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.lang.StringUtils;
 import org.typetalk.Application;
 import org.typetalk.TypeTalkProperties;
 import org.w3c.dom.Document;
@@ -88,6 +89,9 @@ public class Language {
 
    @Override
    public String toString() {
+      if (StringUtils.isBlank(country)) {
+         return language;
+      }
       return language + " - " + country;
    }
 
@@ -116,7 +120,12 @@ public class Language {
             String name = ((Element) languageNode).getAttribute("name");
             String description = ((Element) descriptionNode).getTextContent();
             String localeText = ((Element) languageNode).getAttribute("locale");
-            Locale locale = new Locale(localeText.split("-")[0], localeText.split("-")[1]);
+            Locale locale;
+            if (localeText.split("-").length > 1) {
+               locale = new Locale(localeText.split("-")[0], localeText.split("-")[1]);
+            } else {
+               locale = new Locale(localeText);
+            }
             String language = locale.getDisplayLanguage();
             String country = locale.getDisplayCountry();
             String languageJarFile = ((Element) filesNode).getTextContent();

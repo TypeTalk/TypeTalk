@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.lang.StringUtils;
 import org.typetalk.Application;
 import org.typetalk.Messages;
 import org.typetalk.TypeTalkProperties;
@@ -103,6 +104,9 @@ public class Voice {
 
    @Override
    public String toString() {
+      if (StringUtils.isBlank(country)) {
+         return Character.toUpperCase(name.charAt(0)) + name.substring(1) + " (" + gender + ", " + language + ")";
+      }
       return Character.toUpperCase(name.charAt(0)) + name.substring(1) + " (" + gender + ", " + language + " - "
             + country + ")";
    }
@@ -139,7 +143,12 @@ public class Voice {
             String description = ((Element) descriptionNode).getTextContent();
             Gender gender = Gender.valueOf(((Element) voiceNode).getAttribute("gender").toUpperCase());
             String localeText = ((Element) voiceNode).getAttribute("locale");
-            Locale locale = new Locale(localeText.split("-")[0], localeText.split("-")[1]);
+            Locale locale;
+            if (localeText.split("-").length > 1) {
+               locale = new Locale(localeText.split("-")[0], localeText.split("-")[1]);
+            } else {
+               locale = new Locale(localeText);
+            }
             String language = locale.getDisplayLanguage();
             String country = locale.getDisplayCountry();
             String voiceJarFile = ((Element) filesNode).getTextContent();

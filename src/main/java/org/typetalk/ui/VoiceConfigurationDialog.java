@@ -178,9 +178,9 @@ public class VoiceConfigurationDialog extends JDialog {
             JOptionPane.INFORMATION_MESSAGE));
       configPanel.add(descriptionVoiceButton, "18, 6, center, center");
 
+      languagesBox.addActionListener(a -> loadVoicesToVoicesBox());
       languagesBox.setSelectedItem(Language.getSelectedLanguage());
       voicesBox.setSelectedItem(Voice.getSelectedVoice());
-      languagesBox.addActionListener(a -> loadVoicesToVoicesBox());
 
       StringSeparator effectsSeparator = new StringSeparator(MESSAGES.get("effects"));
       configPanel.add(effectsSeparator, "1, 8, 18, 1");
