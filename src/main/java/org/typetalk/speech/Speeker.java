@@ -171,7 +171,7 @@ public class Speeker {
          }
 
       } else {
-         words.stream().forEach(w -> speek(w));
+         words.forEach(w -> speek(w));
       }
    }
 
@@ -189,11 +189,11 @@ public class Speeker {
    }
 
    private void notifyEndOfSpeechListeners() {
-      endOfSpeechListeners.stream().forEach(l -> l.endOfSpeech());
+      endOfSpeechListeners.forEach(l -> l.endOfSpeech());
    }
    
    private void notifySpeechListeners(String speech) {
-      speechListeners.stream().forEach(l -> l.currentlySpeeking(speech));
+      speechListeners.forEach(l -> l.currentlySpeeking(speech));
    }
 
    public interface EndOfSpeechListener {

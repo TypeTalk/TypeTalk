@@ -40,6 +40,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
 import org.typetalk.Messages;
+import org.typetalk.speech.Language;
 import org.typetalk.speech.SoundEffect;
 import org.typetalk.speech.Voice;
 
@@ -61,6 +62,7 @@ public class VoiceConfigurationDialog extends JDialog {
 
    private static final Messages MESSAGES = Messages.getInstance();
 
+   private JComboBox<Language> languagesBox;
    private JComboBox<Voice> voicesBox;
    private List<EffectPanel> effectPanels = new ArrayList<>();
 
@@ -156,47 +158,63 @@ public class VoiceConfigurationDialog extends JDialog {
       StringSeparator stringSeparator = new StringSeparator(MESSAGES.get("voice"));
       configPanel.add(stringSeparator, "1, 2, 18, 1");
 
+      languagesBox = new JComboBox<>();
+      Language.getAllLanguages().forEach(l -> languagesBox.addItem(l));
+      configPanel.add(languagesBox, "2, 4, 13, 1");
+
       voicesBox = new JComboBox<>();
-      Voice.getAllVoices().stream().forEach(v -> voicesBox.addItem(v));
-      voicesBox.setSelectedItem(Voice.getSelectedVoice());
-      configPanel.add(voicesBox, "2, 4, 13, 1");
+      Voice.getAllVoices().forEach(v -> voicesBox.addItem(v));
+      configPanel.add(voicesBox, "2, 6, 13, 1");
+
+      JButton descriptionLanguageButton = new JButton(Icon.getIcon("/icons/help.png"));
+      descriptionLanguageButton.addActionListener(a -> JOptionPane.showMessageDialog(VoiceConfigurationDialog.this,
+            ((Language) languagesBox.getSelectedItem()).getDescription(),
+            ((Language) languagesBox.getSelectedItem()).getName(), JOptionPane.INFORMATION_MESSAGE));
+      configPanel.add(descriptionLanguageButton, "18, 4, center, center");
 
       JButton descriptionVoiceButton = new JButton(Icon.getIcon("/icons/help.png"));
       descriptionVoiceButton.addActionListener(a -> JOptionPane.showMessageDialog(VoiceConfigurationDialog.this,
             ((Voice) voicesBox.getSelectedItem()).getDescription(), ((Voice) voicesBox.getSelectedItem()).getName(),
             JOptionPane.INFORMATION_MESSAGE));
-      configPanel.add(descriptionVoiceButton, "18, 4, center, center");
+      configPanel.add(descriptionVoiceButton, "18, 6, center, center");
 
-      StringSeparator dimensionsSeparator = new StringSeparator(MESSAGES.get("effects"));
-      configPanel.add(dimensionsSeparator, "1, 6, 18, 1");
+      languagesBox.setSelectedItem(Language.getSelectedLanguage());
+      voicesBox.setSelectedItem(Voice.getSelectedVoice());
+      languagesBox.addActionListener(a -> loadVoicesToVoicesBox());
 
-      configPanel.add(new JLabel(MESSAGES.get("name")), "2, 8, 1, 1");
-      configPanel.add(new JLabel(MESSAGES.get("enabled")), "4, 8, 1, 1");
-      configPanel.add(new JLabel(MESSAGES.get("parameters")), "6, 8, 8, 1, left, default");
+      StringSeparator effectsSeparator = new StringSeparator(MESSAGES.get("effects"));
+      configPanel.add(effectsSeparator, "1, 8, 18, 1");
 
-      configPanel.add(new JLabel(" "), "2, 10, 1, 1");
+      configPanel.add(new JLabel(MESSAGES.get("name")), "2, 10, 1, 1");
+      configPanel.add(new JLabel(MESSAGES.get("enabled")), "4, 10, 1, 1");
+      configPanel.add(new JLabel(MESSAGES.get("parameters")), "6, 10, 8, 1, left, default");
 
-      configPanel.add(new JSeparator(), "2, 11, 17, 1");
+      configPanel.add(new JLabel(" "), "2, 12, 1, 1");
+
+      configPanel.add(new JSeparator(), "2, 13, 17, 1");
       for (int i = 0; i < SoundEffect.getAllSoundEffects().size(); i++) {
          EffectPanel effectPanel = new EffectPanel(SoundEffect.getAllSoundEffects().get(i));
-         configPanel.add(effectPanel, String.format("2, %d, 17, 1", i * 2 + 12));
+         configPanel.add(effectPanel, String.format("2, %d, 17, 1", i * 2 + 14));
          effectPanels.add(effectPanel);
          if (i < SoundEffect.getAllSoundEffects().size() - 1) {
-            configPanel.add(new JSeparator(), String.format("2, %d, 17, 1", i * 2 + 13));
+            configPanel.add(new JSeparator(), String.format("2, %d, 17, 1", i * 2 + 15));
          }
       }
 
-      configPanel.add(new StringSeparator(MESSAGES.get("preview")), "1, 22, 18, 1");
+      configPanel.add(new StringSeparator(MESSAGES.get("preview")), "1, 24, 18, 1");
 
       JTextField previewField = new JTextField(MESSAGES.get("preview_text"));
-      configPanel.add(previewField, "2, 24, 13, 1");
+      configPanel.add(previewField, "2, 26, 13, 1");
 
       JButton previewButton = new JButton(Icon.getIcon("/icons/control_play.png"));
       previewButton.addActionListener(a -> {
          try {
             LocalMaryInterface marytts = new LocalMaryInterface();
             marytts.setVoice(((Voice) voicesBox.getSelectedItem()).getName());
-            String effectsString = effectPanels.stream().filter(ep -> ep.isEnabled()).map(ep -> ep.getEffectString())
+            String effectsString = effectPanels
+                  .stream()
+                  .filter(ep -> ep.isEnabled())
+                  .map(ep -> ep.getEffectString())
                   .collect(Collectors.joining("+"));
             marytts.setAudioEffects(effectsString);
             AudioInputStream audio = marytts.generateAudio(previewField.getText().toLowerCase());
@@ -208,17 +226,31 @@ public class VoiceConfigurationDialog extends JDialog {
                   MESSAGES.get("error"), JOptionPane.ERROR_MESSAGE);
          }
       });
-      configPanel.add(previewButton, "18, 24, center, center");
+      configPanel.add(previewButton, "18, 26, center, center");
+   }
+
+   private void loadVoicesToVoicesBox() {
+      voicesBox.removeAllItems();
+      List<Voice> voicesWithSelectedLanguage = Voice.getAllVoices()
+            .stream()
+            .filter(v -> v.getLocale().equals(((Language) languagesBox.getSelectedItem()).getLocale()))
+            .collect(Collectors.toList());
+      voicesWithSelectedLanguage.forEach(v -> voicesBox.addItem(v));
+      if (!voicesWithSelectedLanguage.isEmpty()) {
+         voicesBox.setSelectedItem(voicesWithSelectedLanguage.get(0));
+      }
    }
 
    private void setDefaults() {
+      languagesBox.setSelectedItem(Language.getDefaultLanguage());
       voicesBox.setSelectedItem(Voice.getDefaultVoice());
-      effectPanels.stream().forEach(ep -> ep.setDefaults());
+      effectPanels.forEach(ep -> ep.setDefaults());
    }
 
    private void saveConfiguration() {
+      Language.setSelectedLanguage(((Language) languagesBox.getSelectedItem()).getName());
       Voice.setSelectedVoice(((Voice) voicesBox.getSelectedItem()).getName());
-      effectPanels.stream().forEach(ep -> ep.saveEffect());
+      effectPanels.forEach(ep -> ep.saveEffect());
    }
 
    private class EffectPanel extends JPanel {
@@ -234,12 +266,12 @@ public class VoiceConfigurationDialog extends JDialog {
 
       public void setDefaults() {
          enabledBox.setSelected(false);
-         levelPanels.stream().forEach(lp -> lp.setDefaultLevel());
+         levelPanels.forEach(lp -> lp.setDefaultLevel());
       }
 
       public void saveEffect() {
          soundEffect.setEnabled(enabledBox.isSelected());
-         levelPanels.stream().forEach(lp -> lp.saveValue());
+         levelPanels.forEach(lp -> lp.saveValue());
       }
 
       public String getEffectString() {
@@ -331,9 +363,10 @@ public class VoiceConfigurationDialog extends JDialog {
       }
 
       private void initUi() {
-         this.setLayout(
-               new FormLayout(new ColumnSpec[] { ColumnSpec.decode("default"), ColumnSpec.decode("default"),ColumnSpec.decode("default:grow"),
-                     ColumnSpec.decode("default") }, new RowSpec[] { FormFactory.DEFAULT_ROWSPEC }));
+         this.setLayout(new FormLayout(
+               new ColumnSpec[] { ColumnSpec.decode("default"), ColumnSpec.decode("default"),
+                     ColumnSpec.decode("default:grow"), ColumnSpec.decode("default") },
+               new RowSpec[] { FormFactory.DEFAULT_ROWSPEC }));
          lowerBoundLabel = new JLabel(soundEffect.getSubEffects().get(subEffectKey).getLowerBoundName());
          higherBoundLabel = new JLabel(soundEffect.getSubEffects().get(subEffectKey).getHigherBoundName());
          subEffectNameLabel = new JLabel(soundEffect.getSubEffects().get(subEffectKey).getName() + ": ");
@@ -342,7 +375,7 @@ public class VoiceConfigurationDialog extends JDialog {
          levelSlider.addChangeListener(cl -> saveValue());
          add(lowerBoundLabel, "1, 1");
          add(higherBoundLabel, "4, 1");
-         if(soundEffect.getSubEffects().size() == 1) {
+         if (soundEffect.getSubEffects().size() == 1) {
             add(levelSlider, "2, 1, 2, 1");
          } else {
             add(subEffectNameLabel, "2 ,1");

@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
@@ -45,19 +46,20 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Language {
 
    private static final List<Language> LANGUAGES = new ArrayList<>();
    private static final Preferences PREFERENCES = Preferences.userNodeForPackage(Language.class);
    private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
-   private static final String DEFAULT_LANGUAGE = "en";
+   private static final String DEFAULT_LANGUAGE = "en-GB";
 
-   @Getter
    private String name;
-   @Getter
    private String description;
-   @Getter
+   private Locale locale;
+   private String language;
+   private String country;
    private String languageJarFile;
 
    public static List<Language> getAllLanguages() {
@@ -86,7 +88,7 @@ public class Language {
 
    @Override
    public String toString() {
-      return name.toUpperCase();
+      return language + " - " + country;
    }
 
    private static List<Language> readAllLanguages() {
@@ -102,18 +104,24 @@ public class Language {
          InputStream xmlStream = new FileInputStream(xmlFile);
          Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlStream);
          document.getDocumentElement().normalize();
-         Node language = document.getElementsByTagName("language").item(0);
-         Node description = document.getElementsByTagName("description").item(0);
-         Node files = document.getElementsByTagName("files").item(0);
 
-         if (language != null && language.getNodeType() == Node.ELEMENT_NODE && description != null
-               && description.getNodeType() == Node.ELEMENT_NODE) {
+         Node languageNode = document.getElementsByTagName("language").item(0);
+         Node descriptionNode = document.getElementsByTagName("description").item(0);
+         Node filesNode = document.getElementsByTagName("files").item(0);
 
-            String name = ((Element) language).getAttribute("name");
-            String descriptionText = ((Element) description).getTextContent();
-            String voiceJarFile = ((Element) files).getTextContent();
+         if (languageNode != null && languageNode.getNodeType() == Node.ELEMENT_NODE && descriptionNode != null
+               && descriptionNode.getNodeType() == Node.ELEMENT_NODE && filesNode != null
+               && filesNode.getNodeType() == Node.ELEMENT_NODE) {
 
-            return new Language(name, descriptionText, voiceJarFile);
+            String name = ((Element) languageNode).getAttribute("name");
+            String description = ((Element) descriptionNode).getTextContent();
+            String localeText = ((Element) languageNode).getAttribute("locale");
+            Locale locale = new Locale(localeText.split("-")[0], localeText.split("-")[1]);
+            String language = locale.getDisplayLanguage();
+            String country = locale.getDisplayCountry();
+            String languageJarFile = ((Element) filesNode).getTextContent();
+
+            return new Language(name, description, locale, language, country, languageJarFile);
 
          } else {
             log.error("No <language>, <description> or <files> element in xml file: " + xmlFile.getName());

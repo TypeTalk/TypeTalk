@@ -46,6 +46,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+@Getter
 @Slf4j
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Voice {
@@ -68,14 +69,12 @@ public class Voice {
    private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
    private static final String DEFAULT_VOICE = "dfki-obadiah-hsmm";
 
-   @Getter
    private String name;
-   @Getter
    private String description;
    private Gender gender;
+   private Locale locale;
    private String language;
    private String country;
-   @Getter
    private String voiceJarFile;
 
    public static List<Voice> getAllVoices() {
@@ -111,9 +110,15 @@ public class Voice {
    private static List<Voice> readAllVoices() {
       File installationDir = new File(
             PROPERTIES.getSettingsDirectory() + File.separator + Application.INSTALLATION_DIR);
-      List<File> voiceFiles = Arrays.asList(installationDir.listFiles()).stream()
-            .filter(f -> f.getName().startsWith("voice")).collect(Collectors.toList());
-      return voiceFiles.stream().map(f -> readFromXml(f)).filter(v -> v != null).collect(Collectors.toList());
+      List<File> voiceFiles = Arrays.asList(installationDir.listFiles())
+            .stream()
+            .filter(f -> f.getName().startsWith("voice"))
+            .collect(Collectors.toList());
+      return voiceFiles
+            .stream()
+            .map(f -> readFromXml(f))
+            .filter(v -> v != null)
+            .collect(Collectors.toList());
    }
 
    private static Voice readFromXml(File xmlFile) {
@@ -121,22 +126,25 @@ public class Voice {
          InputStream xmlStream = new FileInputStream(xmlFile);
          Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlStream);
          document.getDocumentElement().normalize();
-         Node voice = document.getElementsByTagName("voice").item(0);
-         Node description = document.getElementsByTagName("description").item(0);
-         Node files = document.getElementsByTagName("files").item(0);
 
-         if (voice != null && voice.getNodeType() == Node.ELEMENT_NODE && description != null
-               && description.getNodeType() == Node.ELEMENT_NODE) {
+         Node voiceNode = document.getElementsByTagName("voice").item(0);
+         Node descriptionNode = document.getElementsByTagName("description").item(0);
+         Node filesNode = document.getElementsByTagName("files").item(0);
 
-            String name = ((Element) voice).getAttribute("name");
-            String descriptionText = ((Element) description).getTextContent();
-            String genderText = ((Element) voice).getAttribute("gender");
-            String localeText = ((Element) voice).getAttribute("locale");
+         if (voiceNode != null && voiceNode.getNodeType() == Node.ELEMENT_NODE && descriptionNode != null
+               && descriptionNode.getNodeType() == Node.ELEMENT_NODE && filesNode != null
+               && filesNode.getNodeType() == Node.ELEMENT_NODE) {
+
+            String name = ((Element) voiceNode).getAttribute("name");
+            String description = ((Element) descriptionNode).getTextContent();
+            Gender gender = Gender.valueOf(((Element) voiceNode).getAttribute("gender").toUpperCase());
+            String localeText = ((Element) voiceNode).getAttribute("locale");
             Locale locale = new Locale(localeText.split("-")[0], localeText.split("-")[1]);
-            String voiceJarFile = ((Element) files).getTextContent();
+            String language = locale.getDisplayLanguage();
+            String country = locale.getDisplayCountry();
+            String voiceJarFile = ((Element) filesNode).getTextContent();
 
-            return new Voice(name, descriptionText, Gender.valueOf(genderText.toUpperCase()),
-                     locale.getDisplayLanguage(), locale.getDisplayCountry(), voiceJarFile);
+            return new Voice(name, description, gender, locale, language, country, voiceJarFile);
 
          } else {
             log.error("No <voice>, <description> or <files> element in xml file: " + xmlFile.getName());
