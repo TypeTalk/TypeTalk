@@ -9,13 +9,13 @@
 		<param name="MaxFileSize" value="5Mb" />
 		<param name="maxBackupIndex" value="5" />
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss.SSS} %p: %m%n" />
+			<param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss.SSS} [%p] %F: %m%n" />
 		</layout>
 	</appender>
 
-	<appender name="console" class="org.apache.log4j.ConsoleAppender">
+	<appender name="console" class="org.typetalk.ANSIConsoleAppender">
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss.SSS} %p: %m%n" />
+			<param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss.SSS} [%p] %F: %m%n" />
 		</layout>
 	</appender>
 
