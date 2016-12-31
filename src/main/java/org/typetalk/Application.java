@@ -22,7 +22,11 @@ package org.typetalk;
 import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,11 +37,11 @@ import java.util.Locale;
 
 import javax.swing.JOptionPane;
 
+import org.apache.commons.io.FilenameUtils;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
-import org.typetalk.speech.Language;
 import org.typetalk.speech.Speeker;
-import org.typetalk.speech.Voice;
+import org.typetalk.speech.VoiceDescription;
 import org.typetalk.ui.ApplicationWindow;
 import org.typetalk.ui.WelcomeScreen;
 
@@ -81,7 +85,7 @@ public final class Application {
          initDefaultLanguagesAndVoices();
          loadLanguagesAndVoices();
 
-      } catch (IOException | URISyntaxException | SecurityException | IllegalArgumentException e) {
+      } catch (IOException | URISyntaxException | SecurityException | IllegalArgumentException | NoSuchMethodException e) {
 
          log.error("Initialization error, unable to start TypeTalk", e);
          splashScreen.setMessage(MESSAGES.get("initialization_error"));
@@ -121,9 +125,28 @@ public final class Application {
       }
    }
 
-   private static void loadLanguagesAndVoices() {
-      Language.loadLanguages();
-      Voice.loadVoices();
+   private static void loadLanguagesAndVoices() throws IOException, NoSuchMethodException, SecurityException {
+      Path libDir = Paths.get(PROPERTIES.getSettingsDirectory() + File.separator + LIB_DIR);
+      URLClassLoader classLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+      Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+      method.setAccessible(true);
+
+      Files.walkFileTree(libDir, new SimpleFileVisitor<Path>() {
+
+         @Override
+         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            if (FilenameUtils.getExtension(file.getFileName().toString()).equals("jar")) {
+               try {
+                  method.invoke(classLoader, file.toUri().toURL());
+               } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                  throw new IOException(e);
+               }
+            }
+            return super.visitFile(file, attrs);
+         }
+      });
+      
+      VoiceDescription.loadVoiceDescriptions();
    }
 
    private static void checkSingleInstance() {
@@ -181,8 +204,8 @@ public final class Application {
    }
 
    private static void setLocale() {
-      String language = PROPERTIES.getLocaleLanguage();
-      String country = PROPERTIES.getLocaleCountry();
+      String language = PROPERTIES.getDisplayLocaleLanguage();
+      String country = PROPERTIES.getDisplayLocaleCountry();
       log.debug("Setting locale to: {}/{}", language, country);
       Locale.setDefault(new Locale(language, country));
    }

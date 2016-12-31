@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -50,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Slf4j
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class Voice {
+public class VoiceDescription {
 
    @AllArgsConstructor
    public enum Gender {
@@ -65,10 +64,8 @@ public class Voice {
       }
    };
 
-   private static final List<Voice> VOICES = new ArrayList<>();
-   private static final Preferences PREFERENCES = Preferences.userNodeForPackage(Voice.class);
+   private static final List<VoiceDescription> VOICE_DESCRIPTIONS = new ArrayList<>();
    private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
-   private static final String DEFAULT_VOICE = "dfki-obadiah-hsmm";
 
    private String name;
    private String description;
@@ -78,28 +75,27 @@ public class Voice {
    private String country;
    private String voiceJarFile;
 
-   public static List<Voice> getAllVoices() {
-      if (VOICES.isEmpty()) {
-         loadVoices();
+   public static List<VoiceDescription> getAllVoiceDescriptions() {
+      if (VOICE_DESCRIPTIONS.isEmpty()) {
+         loadVoiceDescriptions();
       }
-      return VOICES;
+      return VOICE_DESCRIPTIONS;
    }
 
-   public static void loadVoices() {
-      VOICES.addAll(readAllVoices());
+   public static void loadVoiceDescriptions() {
+      VOICE_DESCRIPTIONS.addAll(readAllVoiceDescriptions());
    }
 
-   public static Voice getSelectedVoice() {
-      String name = PREFERENCES.get("voice", DEFAULT_VOICE);
-      return getVoice(name);
-   }
-
-   public static void setSelectedVoice(String voice) {
-      PREFERENCES.put("voice", voice);
-   }
-
-   public static Voice getDefaultVoice() {
-      return getVoice(DEFAULT_VOICE);
+   public static VoiceDescription getVoiceDescription(String name) {
+      try {
+   
+         return getAllVoiceDescriptions().stream().filter(v -> v.getName().equals(name)).collect(Collectors.toList()).get(0);
+   
+      } catch (IndexOutOfBoundsException e) {
+         log.error("No voices found");
+      }
+   
+      return null;
    }
 
    @Override
@@ -111,7 +107,7 @@ public class Voice {
             + country + ")";
    }
 
-   private static List<Voice> readAllVoices() {
+   private static List<VoiceDescription> readAllVoiceDescriptions() {
       File installationDir = new File(
             PROPERTIES.getSettingsDirectory() + File.separator + Application.INSTALLATION_DIR);
       List<File> voiceFiles = Arrays.asList(installationDir.listFiles())
@@ -125,7 +121,7 @@ public class Voice {
             .collect(Collectors.toList());
    }
 
-   private static Voice readFromXml(File xmlFile) {
+   private static VoiceDescription readFromXml(File xmlFile) {
       try {
          InputStream xmlStream = new FileInputStream(xmlFile);
          Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlStream);
@@ -153,7 +149,7 @@ public class Voice {
             String country = locale.getDisplayCountry();
             String voiceJarFile = ((Element) filesNode).getTextContent();
 
-            return new Voice(name, description, gender, locale, language, country, voiceJarFile);
+            return new VoiceDescription(name, description, gender, locale, language, country, voiceJarFile);
 
          } else {
             log.error("No <voice>, <description> or <files> element in xml file: " + xmlFile.getName());
@@ -161,18 +157,6 @@ public class Voice {
 
       } catch (SAXException | IOException | ParserConfigurationException e) {
          log.error("Not able to parse xml to voice, file: " + xmlFile.getName(), e);
-      }
-
-      return null;
-   }
-
-   private static Voice getVoice(String name) {
-      try {
-
-         return getAllVoices().stream().filter(v -> v.getName().equals(name)).collect(Collectors.toList()).get(0);
-
-      } catch (IndexOutOfBoundsException e) {
-         log.error("No voices found");
       }
 
       return null;

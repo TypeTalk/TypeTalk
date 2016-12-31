@@ -33,6 +33,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import org.typetalk.Messages;
+import org.typetalk.TypeTalkProperties;
 import org.typetalk.ui.ToastWindow;
 
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,7 @@ import marytts.util.data.audio.AudioPlayer;
 public class Speeker {
 
    private static final Messages MESSAGES = Messages.getInstance();
+   private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
 
    private volatile boolean speeking;
    private boolean isLastSentence;
@@ -121,7 +123,7 @@ public class Speeker {
       log.debug("Initialiazing MaryTTS");
       marytts = new LocalMaryInterface();
 
-      String voice = Voice.getSelectedVoice().getName();
+      String voice = PROPERTIES.getVoice();
       log.debug("Setting voice to: " + voice);
       marytts.setVoice(voice);
 

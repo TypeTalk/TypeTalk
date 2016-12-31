@@ -32,15 +32,19 @@ public class TypeTalkProperties implements Properties {
    public static final boolean DEFAULT_WELCOME_SCREEN_ENABLED = true;
    public static final boolean DEFAULT_START_MINIMIZED = false;
    public static final boolean DEFAULT_SCREEN_COLLAPSED = true;
-   public static final String DEFAULT_VOICE = "DFKI_OBADIAH";
+   public static final String DEFAULT_VOICE = "dfki-obadiah-hsmm";
+   public static final String DEFAULT_VOICE_LANGUAGE = "en";
+   public static final String DEFAULT_VOICE_COUNTRY = "us";
    public static final int DEFAULT_DOUBLE_CLICK_DELAY = 250;
    public static final int DEFAULT_TOAST_TIME = 3000;
    public static final String DEFAULT_SETTINGS_DIRECTORY = ".typetalk";
    public static final String DEFAULT_POPULAR_PHRASES = "Yes.,No.,Yes please.,No thanks.,Ok.,Fine.,Hello.,Goodbye.,Thank you.";
    public static final boolean DEFAULT_SUGGESTIONS_ENABLED = true; 
 
-   private static final String KEY_LANGUAGE = "language";
-   private static final String KEY_COUNTRY = "country";
+   private static final String KEY_DISPLAY_LANGUAGE = "displaylanguage";
+   private static final String KEY_DISPLAY_COUNTRY = "displaycountry";
+   private static final String KEY_VOICE_LANGUAGE = "voicelanguage";
+   private static final String KEY_VOICE_COUNTRY = "voicecountry";
    private static final String KEY_NATIVE_HOOK_KEY_CODES = "nativehookkeycodes";
    private static final String KEY_SPLASH_SCREEN_ENABLED = "splashscreenenabled";
    private static final String KEY_WELCOME_SCREEN_ENABLED = "welcomescreenenabled";
@@ -69,22 +73,38 @@ public class TypeTalkProperties implements Properties {
       return instance;
    }
 
-   public String getLocaleLanguage() {
+   public String getDisplayLocaleLanguage() {
       Locale currentLocale = Locale.getDefault();
-      return userPreferences.get(KEY_LANGUAGE, currentLocale.getLanguage());
+      return userPreferences.get(KEY_DISPLAY_LANGUAGE, currentLocale.getLanguage());
    }
 
-   public void setLocaleLanguage(String language) {
-      userPreferences.put(KEY_LANGUAGE, language);
+   public void setDisplayLocaleLanguage(String language) {
+      userPreferences.put(KEY_DISPLAY_LANGUAGE, language);
    }
 
-   public String getLocaleCountry() {
+   public String getDisplayLocaleCountry() {
       Locale currentLocale = Locale.getDefault();
-      return userPreferences.get(KEY_COUNTRY, currentLocale.getCountry());
+      return userPreferences.get(KEY_DISPLAY_COUNTRY, currentLocale.getCountry());
    }
 
-   public void setLocaleCountry(String country) {
-      userPreferences.put(KEY_COUNTRY, country);
+   public void setDisplayLocaleCountry(String country) {
+      userPreferences.put(KEY_DISPLAY_COUNTRY, country);
+   }
+   
+   public String getVoiceLocaleLanguage() {
+      return userPreferences.get(KEY_VOICE_LANGUAGE, DEFAULT_VOICE_LANGUAGE);
+   }
+   
+   public void setVoiceLocaleLanguage(String language) {
+      userPreferences.put(KEY_VOICE_LANGUAGE, language);
+   }
+   
+   public String getVoiceLocaleCountry() {
+      return userPreferences.get(KEY_VOICE_COUNTRY, DEFAULT_VOICE_COUNTRY);
+   }
+   
+   public void setVoiceLocaleCountry(String country) {
+      userPreferences.put(KEY_VOICE_COUNTRY, country);
    }
 
    public void setSplashScreenEnabled(boolean splashScreenEnabled) {

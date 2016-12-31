@@ -22,8 +22,11 @@ package org.typetalk.ui;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import javax.sound.sampled.AudioInputStream;
@@ -40,9 +43,10 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
 import org.typetalk.Messages;
+import org.typetalk.TypeTalkProperties;
 import org.typetalk.speech.Language;
 import org.typetalk.speech.SoundEffect;
-import org.typetalk.speech.Voice;
+import org.typetalk.speech.VoiceDescription;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -51,20 +55,28 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import marytts.LocalMaryInterface;
+import marytts.datatypes.MaryDataType;
+import marytts.exceptions.MaryConfigurationException;
+import marytts.modules.synthesis.Voice;
 import marytts.util.data.audio.AudioPlayer;
 import raging.goblin.swingutils.DoubleSlider;
 import raging.goblin.swingutils.Icon;
 import raging.goblin.swingutils.ScreenPositioner;
 import raging.goblin.swingutils.StringSeparator;
 
+@Slf4j
 public class VoiceConfigurationDialog extends JDialog {
 
    private static final Messages MESSAGES = Messages.getInstance();
+   private static final TypeTalkProperties PROPERTIES = TypeTalkProperties.getInstance();
 
    private JComboBox<Language> languagesBox;
    private JComboBox<Voice> voicesBox;
+   private JTextField previewField = new JTextField();;
    private List<EffectPanel> effectPanels = new ArrayList<>();
+   LocalMaryInterface marytts;
 
    @Getter
    private boolean okPressed;
@@ -74,8 +86,19 @@ public class VoiceConfigurationDialog extends JDialog {
       setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
       setSize(1000, 450);
       ScreenPositioner.centerOnScreen(this);
+      initMaryTts();
       initActionsPanel();
       initConfigPanel();
+   }
+
+   private void initMaryTts() {
+      try {
+         marytts = new LocalMaryInterface();
+      } catch (MaryConfigurationException e) {
+         JOptionPane.showMessageDialog(VoiceConfigurationDialog.this, MESSAGES.get("init_marytts_error"),
+               MESSAGES.get("error"), JOptionPane.ERROR_MESSAGE);
+         log.error("Unable to start marytts", e);
+      }
    }
 
    private void initActionsPanel() {
@@ -159,28 +182,25 @@ public class VoiceConfigurationDialog extends JDialog {
       configPanel.add(stringSeparator, "1, 2, 18, 1");
 
       languagesBox = new JComboBox<>();
-      Language.getAllLanguages().forEach(l -> languagesBox.addItem(l));
+      marytts.getAvailableLocales().stream().filter(l -> !marytts.getAvailableVoices(l).isEmpty())
+            .forEach(l -> languagesBox.addItem(new Language(l)));
       configPanel.add(languagesBox, "2, 4, 13, 1");
 
       voicesBox = new JComboBox<>();
-      Voice.getAllVoices().forEach(v -> voicesBox.addItem(v));
+      marytts.getAvailableVoices().forEach(v -> voicesBox.addItem(Voice.getVoice((v))));
       configPanel.add(voicesBox, "2, 6, 13, 1");
-
-      JButton descriptionLanguageButton = new JButton(Icon.getIcon("/icons/help.png"));
-      descriptionLanguageButton.addActionListener(a -> JOptionPane.showMessageDialog(VoiceConfigurationDialog.this,
-            ((Language) languagesBox.getSelectedItem()).getDescription(),
-            ((Language) languagesBox.getSelectedItem()).getName(), JOptionPane.INFORMATION_MESSAGE));
-      configPanel.add(descriptionLanguageButton, "18, 4, center, center");
 
       JButton descriptionVoiceButton = new JButton(Icon.getIcon("/icons/help.png"));
       descriptionVoiceButton.addActionListener(a -> JOptionPane.showMessageDialog(VoiceConfigurationDialog.this,
-            ((Voice) voicesBox.getSelectedItem()).getDescription(), ((Voice) voicesBox.getSelectedItem()).getName(),
-            JOptionPane.INFORMATION_MESSAGE));
+            VoiceDescription.getVoiceDescription(((Voice) voicesBox.getSelectedItem()).getName()).getDescription(),
+            ((Voice) voicesBox.getSelectedItem()).getName(), JOptionPane.INFORMATION_MESSAGE));
       configPanel.add(descriptionVoiceButton, "18, 6, center, center");
 
       languagesBox.addActionListener(a -> loadVoicesToVoicesBox());
-      languagesBox.setSelectedItem(Language.getSelectedLanguage());
-      voicesBox.setSelectedItem(Voice.getSelectedVoice());
+      languagesBox.setSelectedItem(
+            new Language(new Locale(PROPERTIES.getVoiceLocaleLanguage(), PROPERTIES.getVoiceLocaleCountry())));
+      languagesBox.addActionListener(a -> updateExampleText());
+      voicesBox.setSelectedItem(PROPERTIES.getVoice());
 
       StringSeparator effectsSeparator = new StringSeparator(MESSAGES.get("effects"));
       configPanel.add(effectsSeparator, "1, 8, 18, 1");
@@ -203,18 +223,21 @@ public class VoiceConfigurationDialog extends JDialog {
 
       configPanel.add(new StringSeparator(MESSAGES.get("preview")), "1, 24, 18, 1");
 
-      JTextField previewField = new JTextField(MESSAGES.get("preview_text"));
+      updateExampleText();
       configPanel.add(previewField, "2, 26, 13, 1");
 
       JButton previewButton = new JButton(Icon.getIcon("/icons/control_play.png"));
       previewButton.addActionListener(a -> {
          try {
-            LocalMaryInterface marytts = new LocalMaryInterface();
-            marytts.setVoice(((Voice) voicesBox.getSelectedItem()).getName());
-            String effectsString = effectPanels
-                  .stream()
-                  .filter(ep -> ep.isEnabled())
-                  .map(ep -> ep.getEffectString())
+
+            System.out.println("I currently have " + marytts.getAvailableVoices() + " voices in "
+                  + marytts.getAvailableLocales() + " languages available.");
+            System.out.println("Out of these, " + marytts.getAvailableVoices(Locale.GERMAN) + " are for German.");
+
+            Voice voice = (Voice) voicesBox.getSelectedItem();
+            marytts.setLocale(voice.getLocale());
+            marytts.setVoice(voice.getName());
+            String effectsString = effectPanels.stream().filter(ep -> ep.isEnabled()).map(ep -> ep.getEffectString())
                   .collect(Collectors.joining("+"));
             marytts.setAudioEffects(effectsString);
             AudioInputStream audio = marytts.generateAudio(previewField.getText().toLowerCase());
@@ -229,27 +252,30 @@ public class VoiceConfigurationDialog extends JDialog {
       configPanel.add(previewButton, "18, 26, center, center");
    }
 
+   private void updateExampleText() {
+      previewField.setText(
+            MaryDataType.getExampleText(MaryDataType.TEXT, ((Language) languagesBox.getSelectedItem()).getLocale()));
+   }
+
    private void loadVoicesToVoicesBox() {
       voicesBox.removeAllItems();
-      List<Voice> voicesWithSelectedLanguage = Voice.getAllVoices()
-            .stream()
-            .filter(v -> v.getLocale().equals(((Language) languagesBox.getSelectedItem()).getLocale()))
-            .collect(Collectors.toList());
-      voicesWithSelectedLanguage.forEach(v -> voicesBox.addItem(v));
-      if (!voicesWithSelectedLanguage.isEmpty()) {
-         voicesBox.setSelectedItem(voicesWithSelectedLanguage.get(0));
+      marytts.getAvailableVoices(((Language) languagesBox.getSelectedItem()).getLocale())
+            .forEach(v -> voicesBox.addItem(Voice.getVoice((v))));
+      if (voicesBox.getItemCount() > 0) {
+         voicesBox.setSelectedIndex(0);
       }
    }
 
    private void setDefaults() {
-      languagesBox.setSelectedItem(Language.getDefaultLanguage());
-      voicesBox.setSelectedItem(Voice.getDefaultVoice());
+      languagesBox.setSelectedItem(new Language(Locale.getDefault()));
+      voicesBox.setSelectedItem(Voice.getDefaultVoice(Locale.getDefault()));
       effectPanels.forEach(ep -> ep.setDefaults());
    }
 
    private void saveConfiguration() {
-      Language.setSelectedLanguage(((Language) languagesBox.getSelectedItem()).getName());
-      Voice.setSelectedVoice(((Voice) voicesBox.getSelectedItem()).getName());
+      PROPERTIES.setVoiceLocaleLanguage(((Language) languagesBox.getSelectedItem()).getLocale().getLanguage());
+      PROPERTIES.setVoiceLocaleCountry(((Language) languagesBox.getSelectedItem()).getLocale().getCountry());
+      PROPERTIES.setVoice((voicesBox.getSelectedItem().toString()));
       effectPanels.forEach(ep -> ep.saveEffect());
    }
 
@@ -388,7 +414,8 @@ public class VoiceConfigurationDialog extends JDialog {
       }
    }
 
-   public static void main(String[] args) {
+   public static void main(String[] args) throws MalformedURLException, NoSuchMethodException, SecurityException,
+         IllegalAccessException, IllegalArgumentException, InvocationTargetException {
       new VoiceConfigurationDialog(null).setVisible(true);
    }
 }
