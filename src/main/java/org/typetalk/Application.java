@@ -82,6 +82,7 @@ public final class Application {
       try {
 
          initDataFolder();
+         initMaryProperties();
          initDefaultLanguagesAndVoices();
          loadLanguagesAndVoices();
 
@@ -176,6 +177,12 @@ public final class Application {
          PROPERTIES.setSettingsDirectory(PROPERTIES.getSettingsDirectory() + "_dir");
          Files.createDirectories(Paths.get(PROPERTIES.getSettingsDirectory()));
       }
+   }
+   
+   private static void initMaryProperties() {
+      System.setProperty("mary.base", PROPERTIES.getSettingsDirectory());
+      System.setProperty("mary.installedDir", PROPERTIES.getSettingsDirectory() + File.separator + INSTALLATION_DIR);
+      System.setProperty("mary.downloadDir", PROPERTIES.getSettingsDirectory() + File.separator + DOWNLOAD_DIR);
    }
 
    private static void initDefaultLanguagesAndVoices() throws IOException, URISyntaxException {

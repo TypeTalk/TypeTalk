@@ -84,6 +84,7 @@ import org.typetalk.data.Suggestions;
 import org.typetalk.speech.Speeker;
 import org.typetalk.speech.Speeker.EndOfSpeechListener;
 import org.typetalk.speech.Speeker.SpeechListener;
+import org.xml.sax.SAXException;
 
 import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -93,6 +94,7 @@ import com.jgoodies.forms.layout.RowSpec;
 import fr.pud.client.view.jsuggestfield.JSuggestField;
 import lombok.extern.slf4j.Slf4j;
 import marytts.exceptions.MaryConfigurationException;
+import marytts.tools.install.InstallFileParser;
 import raging.goblin.swingutils.AboutWindow;
 import raging.goblin.swingutils.HelpBrowser;
 import raging.goblin.swingutils.Icon;
@@ -586,6 +588,36 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
       });
       configureMenu.add(configureVoiceItem);
 
+      JMenuItem installVoicesItem = new JMenuItem(MESSAGES.get("install_voices"), Icon.getIcon("/icons/group_add.png"));
+      installVoicesItem.setMnemonic(KeyEvent.VK_D);
+      installVoicesItem.addActionListener(a -> {
+         InstallerGUI installerGui = new InstallerGUI();
+
+         File installedDir = new File(System.getProperty("mary.installedDir"));
+         File[] componentDescriptionFiles = installedDir.listFiles((dir, name) -> name.endsWith(".xml"));
+         Arrays.asList(componentDescriptionFiles).forEach(f -> {
+            try {
+               installerGui.addLanguagesAndVoices(new InstallFileParser(f.toURI().toURL()));
+            } catch (IOException | SAXException e) {
+               log.error("Unable to instantiate InstallFileParser", e);
+            }
+         });
+
+         File downloadDir = new File(System.getProperty("mary.downloadDir"));
+         componentDescriptionFiles = downloadDir.listFiles((dir, name) -> name.endsWith(".xml"));
+         Arrays.asList(componentDescriptionFiles).forEach(f -> {
+            try {
+               installerGui.addLanguagesAndVoices(new InstallFileParser(f.toURI().toURL()));
+            } catch (IOException | SAXException e) {
+               log.error("Unable to instantiate InstallFileParser", e);
+            }
+         });
+
+         ScreenPositioner.centerOnScreen(installerGui);
+         installerGui.setVisible(true);
+      });
+      configureMenu.add(installVoicesItem);
+
       JMenuItem configureGuiItem = new JMenuItem(MESSAGES.get("configure_gui"),
             Icon.getIcon("/icons/application_form_edit.png"));
       configureGuiItem.setMnemonic(KeyEvent.VK_G);
@@ -656,8 +688,7 @@ public class ApplicationWindow extends JFrame implements EndOfSpeechListener, Sp
       aboutItem.setMnemonic(KeyEvent.VK_A);
       aboutItem.addActionListener(a -> new AboutWindow(ApplicationWindow.this, MESSAGES.get("client_window_title"),
             "/icons/sound.png", MESSAGES.get("version_text"), MESSAGES.get("url_text"), MESSAGES.get("about_text"),
-            MESSAGES.get("license_text"))
-                  .setVisible(true));
+            MESSAGES.get("license_text")).setVisible(true));
       helpMenu.add(aboutItem);
 
       return menuBar;

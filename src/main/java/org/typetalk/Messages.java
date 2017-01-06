@@ -34,7 +34,7 @@ public class Messages {
 	private ResourceBundle messages;
 
 	private Messages() {
-		Locale locale = new Locale(PROPERTIES.getLocaleLanguage(), PROPERTIES.getLocaleLanguage());
+		Locale locale = new Locale(PROPERTIES.getDisplayLocaleLanguage(), PROPERTIES.getDisplayLocaleLanguage());
 		messages = ResourceBundle.getBundle("messages", locale);
 	}
 
