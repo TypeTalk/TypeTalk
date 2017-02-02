@@ -65,7 +65,8 @@ import marytts.tools.install.VoiceUpdateListener;
 import marytts.util.MaryUtils;
 
 /**
- * This is a copy of the original InstallerGUI, I removed the System.exit(0) on close.
+ * This is a copy of the original marytts.tools.installInstallerGUI, 
+ * I removed the System.exit(0) on close.
  */
 public class InstallerGUI extends javax.swing.JFrame implements VoiceUpdateListener {
    private Map<String, LanguageComponentDescription> languages;
