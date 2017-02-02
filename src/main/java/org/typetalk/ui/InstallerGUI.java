@@ -63,9 +63,10 @@ import marytts.tools.install.ShortDescriptionPanel;
 import marytts.tools.install.VoiceComponentDescription;
 import marytts.tools.install.VoiceUpdateListener;
 import marytts.util.MaryUtils;
+import raging.goblin.swingutils.Icon;
 
 /**
- * This is a copy of the original marytts.tools.installInstallerGUI, 
+ * This is a copy of the original marytts.tools.installInstallerGUI,
  * I removed the System.exit(0) on close.
  */
 public class InstallerGUI extends javax.swing.JFrame implements VoiceUpdateListener {
@@ -89,12 +90,13 @@ public class InstallerGUI extends javax.swing.JFrame implements VoiceUpdateListe
 
    /**
     * Creates new installer gui and fills it with content from the given URL.
-    * 
+    *
     * @param maryComponentURL
     *           maryComponentURL
     */
    public InstallerGUI(String maryComponentURL) {
       setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+      setIconImage(Icon.getIcon("/icons/sound.png").getImage());
       this.languages = new TreeMap<>();
       this.voices = new TreeMap<>();
       initComponents();
@@ -602,7 +604,7 @@ public class InstallerGUI extends javax.swing.JFrame implements VoiceUpdateListe
 
    /**
     * Show the licenses for the components in toInstall
-    * 
+    *
     * @param toInstall
     *           the components to install
     * @return true if all licenses were accepted, false otherwise
@@ -682,7 +684,7 @@ public class InstallerGUI extends javax.swing.JFrame implements VoiceUpdateListe
     * For all components to be uninstalled, find any shared files required by components that will <i>not</i> be
     * uninstalled, and store them in the component (using {@link ComponentDescription#setSharedFiles(List)}).
     * {@link ComponentDescription#uninstall()} can then check and refrain from removing those shared files.
-    * 
+    *
     * @param uninstallComponents
     *           selected for uninstallation
     */
