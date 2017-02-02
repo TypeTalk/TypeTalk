@@ -193,9 +193,9 @@ public final class Application {
       Path downloadDir = Paths.get(PROPERTIES.getSettingsDirectory() + File.separator + DOWNLOAD_DIR);
       Files.createDirectories(downloadDir);
 
-      copyResourcesToFileSystem(Paths.get(Application.class.getResource("/voices/" + INSTALLATION_DIR).toURI()),
+      copyResourcesToFileSystem(Paths.get(Application.class.getResource("/components/" + INSTALLATION_DIR).toURI()),
             installationDir);
-      copyResourcesToFileSystem(Paths.get(Application.class.getResource("/voices/" + LIB_DIR).toURI()), libDir);
+      copyResourcesToFileSystem(Paths.get(Application.class.getResource("/components/" + LIB_DIR).toURI()), libDir);
    }
 
    private static void copyResourcesToFileSystem(Path resourcePath, Path fileSystemPath) throws IOException {
