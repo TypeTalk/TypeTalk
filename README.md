@@ -17,7 +17,8 @@ If you are using a Linux system the easiest way to install TypeTalk is by using 
 3. run 'mvn install' inside this directory
 
 ##2.3 TypeTalk
-Clone repo: 'git clone https://github.com/TypeTalk/TypeTalk.git'
+1. Clone repo: 'git clone https://github.com/TypeTalk/TypeTalk.git'
+2. run 'mvn package' inside the TypeTalk directory
 
 ##2.4 Lombok
 Follow instructions from https://projectlombok.org/ to setup IDE.
