@@ -4,7 +4,6 @@
 
 	<groupId>org.typetalk</groupId>
 	<artifactId>typetalk</artifactId>
-	<version>1.7</version>
 	<packaging>jar</packaging>
 
 	<name>TypeTalk</name>
@@ -19,7 +18,7 @@
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<artifact>TypeTalk.one-jar.jar</artifact>
+		<artifact>TypeTalk-jar-with-dependencies.jar</artifact>
 		<app.home>/opt/typetalk</app.home>
 		<marytts.version>5.2</marytts.version>
 	</properties>
@@ -31,17 +30,15 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.3</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
 				</configuration>
 			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.10</version>
 				<configuration>
 					<downloadSources>true</downloadSources>
 					<downloadJavadocs>false</downloadJavadocs>
@@ -49,29 +46,26 @@
 			</plugin>
 
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.6</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>org.typetalk.Application</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.dstovall</groupId>
-				<artifactId>onejar-maven-plugin</artifactId>
-				<version>1.4.4</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>one-jar</goal>
-						</goals>
-					</execution>
-				</executions>
+			  <artifactId>maven-assembly-plugin</artifactId>
+			  <configuration>
+			    <archive>
+			      <manifest>
+			        <mainClass>org.typetalk.Application</mainClass>
+			      </manifest>
+			    </archive>
+			    <descriptorRefs>
+			      <descriptorRef>jar-with-dependencies</descriptorRef>
+			    </descriptorRefs>
+			  </configuration>
+			  <executions>
+			    <execution>
+			      <id>make-assembly</id> 
+			      <phase>package</phase>
+			      <goals>
+			        <goal>single</goal>
+			      </goals>
+			    </execution>
+			  </executions>
 			</plugin>
 
 			<plugin>
@@ -273,5 +267,6 @@
 		</dependency>
 	</dependencies>
 
+	<version>2.0</version>
 </project>
 

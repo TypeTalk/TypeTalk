@@ -22,6 +22,7 @@ package org.typetalk;
 import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
@@ -34,6 +35,8 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Locale;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.swing.JOptionPane;
 
@@ -86,7 +89,8 @@ public final class Application {
          initDefaultLanguagesAndVoices();
          loadLanguagesAndVoices();
 
-      } catch (IOException | URISyntaxException | SecurityException | IllegalArgumentException | NoSuchMethodException e) {
+      } catch (IOException | URISyntaxException | SecurityException | IllegalArgumentException
+            | NoSuchMethodException e) {
 
          log.error("Initialization error, unable to start TypeTalk", e);
          splashScreen.setMessage(MESSAGES.get("initialization_error"));
@@ -146,7 +150,7 @@ public final class Application {
             return super.visitFile(file, attrs);
          }
       });
-      
+
       VoiceDescription.loadVoiceDescriptions();
    }
 
@@ -178,7 +182,7 @@ public final class Application {
          Files.createDirectories(Paths.get(PROPERTIES.getSettingsDirectory()));
       }
    }
-   
+
    private static void initMaryProperties() {
       System.setProperty("mary.base", PROPERTIES.getSettingsDirectory());
       System.setProperty("mary.installedDir", PROPERTIES.getSettingsDirectory() + File.separator + INSTALLATION_DIR);
@@ -193,21 +197,24 @@ public final class Application {
       Path downloadDir = Paths.get(PROPERTIES.getSettingsDirectory() + File.separator + DOWNLOAD_DIR);
       Files.createDirectories(downloadDir);
 
-      copyResourcesToFileSystem(Paths.get(Application.class.getResource("/components/" + INSTALLATION_DIR).toURI()),
-            installationDir);
-      copyResourcesToFileSystem(Paths.get(Application.class.getResource("/components/" + LIB_DIR).toURI()), libDir);
+      extractZipFromJar(PROPERTIES.getSettingsDirectory());
    }
 
-   private static void copyResourcesToFileSystem(Path resourcePath, Path fileSystemPath) throws IOException {
-      Files.walkFileTree(resourcePath, new SimpleFileVisitor<Path>() {
-         @Override
-         public FileVisitResult visitFile(Path resourceFile, BasicFileAttributes attrs) throws IOException {
-            if (!fileSystemPath.resolve(resourceFile.getFileName()).toFile().exists()) {
-               Files.copy(resourceFile, fileSystemPath.resolve(resourceFile.getFileName()));
+   private static void extractZipFromJar(String outputFolder) throws IOException {
+      InputStream is = Application.class.getResourceAsStream("/components/components.zip");
+      try (ZipInputStream zis = new ZipInputStream(is)) {
+         ZipEntry entry;
+         while ((entry = zis.getNextEntry()) != null) {
+            if (entry.isDirectory()) {
+               Files.createDirectories(Paths.get(outputFolder + File.separator + entry.getName()));
+            } else {
+               Path outputFile = Paths.get(outputFolder + File.separator + entry.getName());
+               if (!outputFile.toFile().exists()) {
+                  Files.copy(zis, outputFile);
+               }
             }
-            return FileVisitResult.CONTINUE;
          }
-      });
+      }
    }
 
    private static void setLocale() {
