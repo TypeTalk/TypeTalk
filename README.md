@@ -19,17 +19,7 @@ If you are using a Linux system the easiest way to install TypeTalk is by using 
 ##2.3 TypeTalk
 Clone repo: 'git clone https://github.com/TypeTalk/TypeTalk.git'
 
-##2.4 MaryTTS voices
-Move to source directory and install voices to local maven repo:
-* mvn install:install-file -DgroupId=de.dfki.mary -DartifactId=voice-dfki-obadiah-hsmm -Dversion=5.2 -Dpackaging=jar -Dfile=lib/voice-dfki-obadiah-hsmm-5.2.jar
-* mvn install:install-file -DgroupId=de.dfki.mary -DartifactId=voice-dfki-spike-hsmm -Dversion=5.2 -Dpackaging=jar -Dfile=lib/voice-dfki-spike-hsmm-5.2.jar
-* mvn install:install-file -DgroupId=de.dfki.mary -DartifactId=voice-cmu-slt-hsmm -Dversion=5.2 -Dpackaging=jar -Dfile=lib/voice-cmu-slt-hsmm-5.2.jar
-* mvn install:install-file -DgroupId=de.dfki.mary -DartifactId=voice-dfki-prudence-hsmm -Dversion=5.2 -Dpackaging=jar -Dfile=lib/voice-dfki-prudence-hsmm-5.2.jar
-* mvn install:install-file -DgroupId=de.dfki.mary -DartifactId=voice-cmu-bdl-hsmm -Dversion=5.2 -Dpackaging=jar -Dfile=lib/voice-cmu-bdl-hsmm-5.2.jar
-* mvn install:install-file -DgroupId=de.dfki.mary -DartifactId=voice-dfki-poppy-hsmm -Dversion=5.2 -Dpackaging=jar -Dfile=lib/voice-dfki-poppy-hsmm-5.2.jar
-* mvn install:install-file -DgroupId=de.dfki.mary -DartifactId=voice-cmu-rms-hsmm -Dversion=5.2 -Dpackaging=jar -Dfile=lib/voice-cmu-rms-hsmm-5.2.jar
-
-##2.5 Lombok
+##2.4 Lombok
 Follow instructions from https://projectlombok.org/ to setup IDE.
 
 
