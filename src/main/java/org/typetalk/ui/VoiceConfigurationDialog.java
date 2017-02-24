@@ -1,6 +1,6 @@
 /*
  * Copyright 2016, TypeTalk <http://typetalk.github.io/TypeTalk>
- * 
+ *
  * This file is part of TypeTalk.
  *
  *  TypeTalk is free software: you can redistribute it and/or modify
@@ -229,11 +229,6 @@ public class VoiceConfigurationDialog extends JDialog {
       JButton previewButton = new JButton(Icon.getIcon("/icons/control_play.png"));
       previewButton.addActionListener(a -> {
          try {
-
-            System.out.println("I currently have " + marytts.getAvailableVoices() + " voices in "
-                  + marytts.getAvailableLocales() + " languages available.");
-            System.out.println("Out of these, " + marytts.getAvailableVoices(Locale.GERMAN) + " are for German.");
-
             Voice voice = (Voice) voicesBox.getSelectedItem();
             marytts.setLocale(voice.getLocale());
             marytts.setVoice(voice.getName());
