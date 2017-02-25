@@ -6,22 +6,17 @@ If you are using a Linux system the easiest way to install TypeTalk is by using 
 
 #2. Build
 
-##2.1 MaryTTS
-1. Download marytts sources from [https://github.com/marytts/marytts/archive/v5.2.zip](https://github.com/marytts/marytts/archive/v5.2.zip)
-2. unzip sources to a temporary directory
-3. run 'mvn install' inside this directory
-
-##2.2 Swingutils
+##2.1 Swingutils
 1. Download swingutils from [https://github.com/raginggoblin/swingutils/archive/master.zip](https://github.com/raginggoblin/swingutils/archive/master.zip)
 2. unzip sources to a temporary directory
 3. run 'mvn install' inside this directory
 
-##2.3 TypeTalk
+##2.2 TypeTalk
 1. Clone repo: 'git clone https://github.com/TypeTalk/TypeTalk.git'
 2. run 'mvn package' inside the TypeTalk directory
 
-##2.4 Lombok
-Follow instructions from https://projectlombok.org/ to setup IDE.
+##2.3 Lombok
+If you want to build TypeTalk using an IDE, follow instructions from https://projectlombok.org/ to setup your IDE.
 
 
 
