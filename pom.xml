@@ -7,6 +7,7 @@
 	<packaging>jar</packaging>
 
 	<name>TypeTalk</name>
+	<version>2.0</version>
 	<url>http://typetalk.github.io/TypeTalk</url>
 	<description>A MaryTTS frontend with batteries included</description>
 
@@ -46,26 +47,26 @@
 			</plugin>
 
 			<plugin>
-			  <artifactId>maven-assembly-plugin</artifactId>
-			  <configuration>
-			    <archive>
-			      <manifest>
-			        <mainClass>org.typetalk.Application</mainClass>
-			      </manifest>
-			    </archive>
-			    <descriptorRefs>
-			      <descriptorRef>jar-with-dependencies</descriptorRef>
-			    </descriptorRefs>
-			  </configuration>
-			  <executions>
-			    <execution>
-			      <id>make-assembly</id> 
-			      <phase>package</phase>
-			      <goals>
-			        <goal>single</goal>
-			      </goals>
-			    </execution>
-			  </executions>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>org.typetalk.Application</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 			<plugin>
@@ -211,6 +212,13 @@
 		</plugins>
 	</build>
 
+	<repositories>
+		<repository>
+			<id>jcenter</id>
+			<url>https://jcenter.bintray.com</url>
+		</repository>
+	</repositories>
+
 	<pluginRepositories>
 		<pluginRepository>
 			<id>onejar-maven-plugin.googlecode.com</id>
@@ -266,7 +274,5 @@
 			<version>${marytts.version}</version>
 		</dependency>
 	</dependencies>
-
-	<version>2.0</version>
 </project>
 
